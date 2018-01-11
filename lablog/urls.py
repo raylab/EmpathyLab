@@ -13,27 +13,27 @@ urlpatterns = [
 
 
 urlpatterns += [   
-    url(r'^mybooks/$', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
-    url(r'^borrowed/$', views.LoanedBooksAllListView.as_view(), name='all-borrowed'), #Added for challenge
+    url(r'^myexperiments/$', views.LoanedRecordsByUserListView.as_view(), name='my-borrowed'),
+    url(r'^borrowed/$', views.LoanedRecordsAllListView.as_view(), name='all-borrowed'), #Added for challenge
 ]
 
 
-# Add URLConf for librarian to renew a book.
+# Add URLConf for librarian to renew a experiment.
 urlpatterns += [   
-    url(r'^record/(?P<pk>[-\w]+)/renew/$', views.renew_book_librarian, name='renew-book-librarian'),
+    url(r'^record/(?P<pk>[-\w]+)/renew/$', views.renew_record_librarian, name='renew-record-librarian'),
 ]
 
 
 # Add URLConf to create, update, and delete authors
 urlpatterns += [  
-    url(r'^subject/create/$', views.SubjectCreate.as_view(), name='author_create'),
-    url(r'^subject/(?P<pk>\d+)/update/$', views.SubjectUpdate.as_view(), name='author_update'),
-    url(r'^subject/(?P<pk>\d+)/delete/$', views.SubjectDelete.as_view(), name='author_delete'),
+    url(r'^subject/create/$', views.SubjectCreate.as_view(), name='subject_create'),
+    url(r'^subject/(?P<pk>\d+)/update/$', views.SubjectUpdate.as_view(), name='subject_update'),
+    url(r'^subject/(?P<pk>\d+)/delete/$', views.SubjectDelete.as_view(), name='subject_delete'),
 ]
 
-# Add URLConf to create, update, and delete books
+# Add URLConf to create, update, and delete experiments
 urlpatterns += [  
-    url(r'^book/create/$', views.BookCreate.as_view(), name='book_create'),
-    url(r'^book/(?P<pk>\d+)/update/$', views.BookUpdate.as_view(), name='book_update'),
-    url(r'^book/(?P<pk>\d+)/delete/$', views.BookDelete.as_view(), name='book_delete'),
+    url(r'^experiment/create/$', views.ExperimentCreate.as_view(), name='experiment_create'),
+    url(r'^experiment/(?P<pk>\d+)/update/$', views.ExperimentUpdate.as_view(), name='experiment_update'),
+    url(r'^experiment/(?P<pk>\d+)/delete/$', views.ExperimentDelete.as_view(), name='experiment_delete'),
 ]

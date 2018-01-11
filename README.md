@@ -1,4 +1,4 @@
-# django_local_library
+# django_empathy_laboratory
 Tutorial "Local Library" website written in Django.
 
 ----

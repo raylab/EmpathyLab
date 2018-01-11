@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from .models import Experiment, Subject, Record, Genre
+from .models import Experiment, Subject, Record, Stimulae
 
 def index(request):
     """
@@ -60,12 +60,12 @@ class SubjectDetailView(generic.DetailView):
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
+class LoanedRecordsByUserListView(LoginRequiredMixin,generic.ListView):
     """
-    Generic class-based view listing books on loan to current user. 
+    Generic class-based view listing records to current user. 
     """
     model = Record
-    template_name ='lablog/bookinstance_list_borrowed_user.html'
+    template_name ='lablog/record_list_borrowed_user.html'
     paginate_by = 10
     
     def get_queryset(self):
@@ -75,13 +75,13 @@ class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
 # Added as part of challenge!
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
-class LoanedBooksAllListView(PermissionRequiredMixin,generic.ListView):
+class LoanedRecordsAllListView(PermissionRequiredMixin,generic.ListView):
     """
-    Generic class-based view listing all books on loan. Only visible to users with can_mark_returned permission.
+    Generic class-based view listing all records. Only visible to users with can_mark_returned permission.
     """
     model = Record
     permission_required = 'lablog.can_mark_returned'
-    template_name ='lablog/bookinstance_list_borrowed_all.html'
+    template_name ='lablog/record_list_borrowed_all.html'
     paginate_by = 10
     
     def get_queryset(self):
@@ -97,11 +97,11 @@ from django.contrib.auth.decorators import permission_required
 from .forms import RenewBookForm
 
 @permission_required('lablog.can_mark_returned')
-def renew_book_librarian(request, pk):
+def renew_record_librarian(request, pk):
     """
     View function for renewing a specific BookInstance by librarian
     """
-    book_inst=get_object_or_404(Record, pk = pk)
+    record_inst=get_object_or_404(Record, pk = pk)
 
     # If this is a POST request then process the Form data
     if request.method == 'POST':
@@ -112,8 +112,8 @@ def renew_book_librarian(request, pk):
         # Check if the form is valid:
         if form.is_valid():
             # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
-            book_inst.due_back = form.cleaned_data['renewal_date']
-            book_inst.save()
+            record_inst.due_back = form.cleaned_data['renewal_date']
+            record_inst.save()
 
             # redirect to a new URL:
             return HttpResponseRedirect(reverse('all-borrowed') )
@@ -123,7 +123,7 @@ def renew_book_librarian(request, pk):
         proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
         form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
 
-    return render(request, 'lablog/book_renew_librarian.html', {'form': form, 'bookinst':book_inst})
+    return render(request, 'lablog/record_renew_librarian.html', {'form': form, 'record':record_inst})
     
     
     
@@ -150,18 +150,18 @@ class SubjectDelete(PermissionRequiredMixin, DeleteView):
     
 
 #Classes created for the forms challenge
-class BookCreate(PermissionRequiredMixin, CreateView):
+class ExperimentCreate(PermissionRequiredMixin, CreateView):
     model = Experiment
     fields = '__all__'
     initial={'date_of_death':'12/10/2016',}
     permission_required = 'lablog.can_mark_returned'
 
-class BookUpdate(PermissionRequiredMixin, UpdateView):
+class ExperimentUpdate(PermissionRequiredMixin, UpdateView):
     model = Experiment
     fields = '__all__'
     permission_required = 'lablog.can_mark_returned'
 
-class BookDelete(PermissionRequiredMixin, DeleteView):
+class ExperimentDelete(PermissionRequiredMixin, DeleteView):
     model = Experiment
     success_url = reverse_lazy('experiments')
     permission_required = 'lablog.can_mark_returned'

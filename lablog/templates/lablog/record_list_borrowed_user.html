@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Borrowed records</h1>
+
+    {% if record_list %}
+    <ul>
+
+      {% for record in record_list %} 
+      <li class="{% if record.is_overdue %}text-danger{% endif %}">
+        <a href="{% url 'experiment-detail' record.experiment.pk %}">{{record.experiment.title}}</a> ({{ record.due_back }})        
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% else %}
+      <p>There are no records borrowed.</p>
+    {% endif %}       
+{% endblock %}
+
