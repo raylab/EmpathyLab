@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Experiments List</h1>
+
+    {% if book_list %}
+    <ul>
+
+      {% for experiment in experiment_list %}
+      <li>
+        <a href="{{ experiment.get_absolute_url }}">{{ experiment.title }}</a> ({{experiment.author}})
+      </li>
+      {% endfor %}
+
+    </ul>
+
+    {% else %}
+      <p>There are no experiments yet.</p>
+    {% endif %}       
+{% endblock %}
+

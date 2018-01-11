@@ -3,7 +3,7 @@ Tutorial "Local Library" website written in Django.
 
 ----
 
-This web application creates an online catalog for a small local library, where users can browse available books and manage their accounts.
+This web application creates an online lablog for a small local library, where users can browse available books and manage their accounts.
 
 The main features that have currently been implemented are:
 
@@ -12,7 +12,7 @@ The main features that have currently been implemented are:
 * Admin users can create and manage models. The admin has been optimised (the basic registration is present in admin.py, but commented out).
 * Librarians can renew reserved books
 
-![Local Library Model](https://github.com/mdn/django-locallibrary-tutorial/blob/master/catalog/static/images/local_library_model_uml.png)
+![Local Library Model](https://github.com/mdn/django-locallibrary-tutorial/blob/master/lablog/static/images/local_library_model_uml.png)
 
 
 For more information see the associated [MDN tutorial home page](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Tutorial_local_library_website).
