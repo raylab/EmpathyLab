@@ -1,20 +1,17 @@
 # django_empathy_laboratory
-Tutorial "Local Library" website written in Django.
+Empathy Lab "Lab Log" website written in Django.
 
 ----
 
-This web application creates an online lablog for a small local library, where users can browse available books and manage their accounts.
+This web application creates an online lablog, where users can browse available experiments, manage their accounts and create new records.
 
 The main features that have currently been implemented are:
 
-* There are models for books, book copies, genre, language and authors.
-* Users can view list and detail information for books and authors.
+* There are models for experiments, records, stimulae, feedback and sybjects.
+* Users can view list and detail information for experiments and subjects.
 * Admin users can create and manage models. The admin has been optimised (the basic registration is present in admin.py, but commented out).
-* Librarians can renew reserved books
+* Librarians can renew reserved records
 
-![Local Library Model](https://github.com/mdn/django-locallibrary-tutorial/blob/master/lablog/static/images/local_library_model_uml.png)
+Based on ![Local Library Model](https://github.com/mdn/django-locallibrary-tutorial/blob/master/lablog/static/images/local_library_model_uml.png)
 
-
-For more information see the associated [MDN tutorial home page](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Tutorial_local_library_website).
-# EmpathyLab
 # EmpathyLab
