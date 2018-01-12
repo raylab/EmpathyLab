@@ -37,14 +37,14 @@ class Experiment(models.Model):
     """
     title = models.CharField(max_length=200)
     subject = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True)
-      # Foreign Key used because subject can only have one author, but subjects can have multiple experiments
-      # Author as a string rather than object because it hasn't been declared yet in file.
+      # Foreign Key used because subject can be only one, but subjects can be in multiple experiments
+      # Subject as a string rather than object because it hasn't been declared yet in file.
     summary = models.TextField(max_length=1000, help_text="Enter a brief description of the experiment")
     isbn = models.CharField('ISBN',max_length=13, help_text='13 Character <a href="https://www.isbn-international.org/content/what-isbn">ISBN number</a>')
     stimulae = models.ManyToManyField(Stimulae, help_text="Select a stimulae for this experiment")
-      # ManyToManyField used because Subject can contain many experiment. experiment can cover many subjects.
-      # Subject declared as an object because it has already been defined.
-    feedback = models.ForeignKey('Feedback', on_delete=models.SET_NULL, null=True)
+      # ManyToManyField used because Stimulae can be in many experiments. experiment can have many Stimulae.
+      # Stimulae declared as an object because it has already been defined.
+    feedback = models.ForeignKey(Feedback, on_delete=models.SET_NULL, null=True)
       
     def display_stimulae(self):
         """
@@ -52,13 +52,16 @@ class Experiment(models.Model):
         """
         return ', '.join([ stimulae.name for stimulae in self.stimulae.all()[:3] ])
         display_stimulae.short_description = 'Stimulae'
+
+    class Meta:
+        ordering = ['title']
     
     
     def get_absolute_url(self):
         """
         Returns the url to access a particular record.
         """
-        return reverse('record-detail', args=[str(self.id)])
+        return reverse('experiment-detail', args=[str(self.id)])
 
     def __str__(self):
         """
@@ -77,7 +80,7 @@ class Record(models.Model):
     Model representing a specific record.
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text="Unique ID for this particular record across whole library")
-    experiment = models.ForeignKey('Experiment', on_delete=models.SET_NULL, null=True) 
+    experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True) 
     imprint = models.CharField(max_length=200)
     due_back = models.DateField(null=True, blank=True)
     borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -117,6 +120,9 @@ class Subject(models.Model):
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
     date_of_death = models.DateField('died', null=True, blank=True)
+
+    class Meta:
+       ordering = ['last_name']
     
     def get_absolute_url(self):
         """

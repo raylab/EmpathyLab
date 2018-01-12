@@ -4,7 +4,7 @@
 
 <h1>Title: {{ experiment.title }}</h1>
 
-<p><strong>Subject:</strong> <a href="{% url 'author-detail' experiment.author.pk %}">{{ experiment.subject }}</a></p>
+<p><strong>Subject:</strong> <a href="{% url 'subject-detail' experiment.subject.pk %}">{{ experiment.subject }}</a></p>
 <p><strong>Summary:</strong> {{ experiment.summary }}</p>
 <p><strong>ISBN:</strong> {{ experiment.isbn }}</p> 
 <p><strong>Feedback:</strong> {{ experiment.feedback }}</p>  

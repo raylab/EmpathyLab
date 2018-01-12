@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #Add our new application 
+    'django_extensions', 
     'lablog.apps.LablogConfig', #This object was created for us in /lablogs/apps.py
 ]
 

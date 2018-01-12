@@ -1,5 +1,7 @@
 from django.shortcuts import render
 
+#import pdb; pdb.set_trace()
+
 # Create your views here.
 
 from .models import Experiment, Subject, Record, Stimulae
@@ -37,11 +39,11 @@ class ExperimentListView(generic.ListView):
     model = Experiment
     paginate_by = 10
     
-class RecordDetailView(generic.DetailView):
+class ExperimentDetailView(generic.DetailView):
     """
     Generic class-based detail view for a experiment.
     """
-    model = Record
+    model = Experiment
 
 class SubjectListView(generic.ListView):
     """

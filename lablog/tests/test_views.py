@@ -66,12 +66,13 @@ class LoanedRecordsByUserListViewTest(TestCase):
         test_record = Experiment.objects.create(title='Experiment Title', summary = 'My experiment summary', isbn='ABCDEFG', subject=test_subject, feedback=test_feedback,)
         # Create stimulae as a post-step
         stimulae_objects_for_record = Stimulae.objects.all()
-        test_record.stimulae = stimulae_objects_for_record
+        #test_record.stimulae = stimulae_objects_for_record ## AB fixed many2many Direct assignment prohibition.
+        test_record.stimulae.set(stimulae_objects_for_record)
         test_record.save()
 
         #Create 30 Record objects
         number_of_record_copies = 30
-        for recordt_copy in range(number_of_record_copies):
+        for record_copy in range(number_of_record_copies):
             return_date= timezone.now() + datetime.timedelta(days=record_copy%5)
             if record_copy % 2:
                 the_borrower=test_user1
@@ -198,7 +199,7 @@ class RenewRecordsViewTest(TestCase):
         test_experiment = Experiment.objects.create(title='Experiment Title', summary = 'My experiment summary', isbn='ABCDEFG', subject=test_subject, feedback=test_feedback,)
         # Create stimulae as a post-step
         stimulae_objects_for_experiment = Stimulae.objects.all()
-        test_experiment.stimulae=stimulae_objects_for_experiment
+        test_experiment.stimulae.set(stimulae_objects_for_experiment)
         test_experiment.save()
 
         #Create a Record object for test_user1
@@ -210,14 +211,14 @@ class RenewRecordsViewTest(TestCase):
         self.test_record2=Record.objects.create(experiment=test_experiment,imprint='Unlikely Imprint, 2016', due_back=return_date, borrower=test_user2, status='o')
         
     def test_redirect_if_not_logged_in(self):
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}) )
         #Manually check redirect (Can't use assertRedirect, because the redirect URL is unpredictable)
         self.assertEqual( resp.status_code,302)
         self.assertTrue( resp.url.startswith('/accounts/login/') )
         
     def test_redirect_if_logged_in_but_not_correct_permission(self):
         login = self.client.login(username='testuser1', password='DAU12345')
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}) )
         
         #Manually check redirect (Can't use assertRedirect, because the redirect URL is unpredictable)
         self.assertEqual( resp.status_code,302)
@@ -225,29 +226,29 @@ class RenewRecordsViewTest(TestCase):
 
     def test_logged_in_with_permission_borrowed_experiment(self):
         login = self.client.login(username='testuser2', password='DAU12345')
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record2.pk,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':self.test_record2.pk,}) )
         
         #Check that it lets us login - this is our experiment and we have the right permissions.
         self.assertEqual( resp.status_code,200)
 
     def test_logged_in_with_permission_another_users_borrowed_experiment(self):
         login = self.client.login(username='testuser2', password='DAU12345')
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}) )
         
         #Check that it lets us login. We're a librarian, so we can view any users experiment
         self.assertEqual( resp.status_code,200)
         
     def test_uses_correct_template(self):
         login = self.client.login(username='testuser2', password='DAU12345')
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}) )
         self.assertEqual( resp.status_code,200)
 
         #Check we used correct template
-        self.assertTemplateUsed(resp, 'lablog/experiment_renew_librarian.html')
+        self.assertTemplateUsed(resp, 'lablog/record_renew_librarian.html')
         
     def test_form_renewal_date_initially_has_date_three_weeks_in_future(self):
         login = self.client.login(username='testuser2', password='DAU12345')
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}) )
         self.assertEqual( resp.status_code,200)
         
         date_3_weeks_in_future = datetime.date.today() + datetime.timedelta(weeks=3)
@@ -257,7 +258,7 @@ class RenewRecordsViewTest(TestCase):
         login = self.client.login(username='testuser2', password='DAU12345')
         
         date_in_past = datetime.date.today() - datetime.timedelta(weeks=1)
-        resp = self.client.post(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}), {'renewal_date':date_in_past} )
+        resp = self.client.post(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}), {'renewal_date':date_in_past} )
         self.assertEqual( resp.status_code,200)
         self.assertFormError(resp, 'form', 'renewal_date', 'Invalid date - renewal in past')
         
@@ -265,21 +266,21 @@ class RenewRecordsViewTest(TestCase):
         login = self.client.login(username='testuser2', password='DAU12345')
         
         invalid_date_in_future = datetime.date.today() + datetime.timedelta(weeks=5)
-        resp = self.client.post(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}), {'renewal_date':invalid_date_in_future} )
+        resp = self.client.post(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}), {'renewal_date':invalid_date_in_future} )
         self.assertEqual( resp.status_code,200)
         self.assertFormError(resp, 'form', 'renewal_date', 'Invalid date - renewal more than 4 weeks ahead')
         
-    def test_redirects_to_all_borrowed_experiment_list_on_success(self):
+    def test_redirects_to_all_borrowed_record_list_on_success(self):
         login = self.client.login(username='testuser2', password='DAU12345')
         valid_date_in_future = datetime.date.today() + datetime.timedelta(weeks=2)
-        resp = self.client.post(reverse('renew-experiment-librarian', kwargs={'pk':self.test_record1.pk,}), {'renewal_date':valid_date_in_future} )
+        resp = self.client.post(reverse('renew-record-librarian', kwargs={'pk':self.test_record1.pk,}), {'renewal_date':valid_date_in_future} )
         self.assertRedirects(resp, reverse('all-borrowed') )
 
     def test_HTTP404_for_invalid_experiment_if_logged_in(self):
         import uuid 
         test_uid = uuid.uuid4() #unlikely UID to match our record!
         login = self.client.login(username='testuser2', password='DAU12345')
-        resp = self.client.get(reverse('renew-experiment-librarian', kwargs={'pk':test_uid,}) )
+        resp = self.client.get(reverse('renew-record-librarian', kwargs={'pk':test_uid,}) )
         self.assertEqual( resp.status_code,404)
 
 

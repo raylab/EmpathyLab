@@ -10,7 +10,7 @@
 
 <dl>
 {% for experiment in subject.experiment_set.all %}
-  <dt><a href="{% url 'record-detail' record.pk %}">{{experiment}}</a> ({{experiment.record_set.all.count}})</dt>
+  <dt><a href="{% url 'experiment-detail' experiment.pk %}">{{experiment}}</a> ({{experiment.record_set.all.count}})</dt>
   <dd>{{experiment.summary}}</dd>
 {% endfor %}
 </dl>
