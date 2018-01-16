@@ -4,21 +4,31 @@
 
 <h1>Title: {{ experiment.title }}</h1>
 
-<p><strong>Subject:</strong> <a href="{% url 'subject-detail' experiment.subject.pk %}">{{ experiment.subject }}</a></p>
 <p><strong>Summary:</strong> {{ experiment.summary }}</p>
 <p><strong>ISBN:</strong> {{ experiment.isbn }}</p> 
 <p><strong>Feedback:</strong> {{ experiment.feedback }}</p>  
 <p><strong>Stimulae:</strong> {% for stimulae in experiment.stimulae.all %}{{stimulae}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
 
 <div style="margin-left:20px;margin-top:20px">
-<h4>Copies</h4>
-
-{% for copy in experiment.record_set.all %}
+<h4>Subjects</h4>
 <hr>
-<p class="{% if copy.status == 'a' %}text-success{% elif copy.status == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ copy.get_status_display }}</p>
-{% if copy.status != 'a' %}<p><strong>Due to be returned:</strong> {{copy.due_back}}</p>{% endif %}
-<p><strong>Imprint:</strong> {{copy.imprint}}</p>
-<p class="text-muted"><strong>Id:</strong> {{copy.id}}</p>
+
+<ul>
+{% for subject in experiment.subjects.all %}
+  <li>
+    <a href="{% url 'subject-detail' subject.pk %}">{{ subject }}, {{ subject.date_of_birth }}, {{ subject.gender }}</a></p> 
+  </li>
+{% endfor %}
+</ul>
+<hr>
+<h4>Records</h4>
+
+{% for record in experiment.record_set.all %}
+<hr>
+<p class="{% if copy.status == 'a' %}text-success{% elif record.status == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ record.get_status_display }}</p>
+{% if record.status != 'a' %}<p><strong>Due to be returned:</strong> {{record.due_back}}</p>{% endif %}
+<p><strong>Imprint:</strong> {{record.imprint}}</p>
+<p class="text-muted"><strong>Id:</strong> {{record.id}}</p>
 
 {% endfor %}
 </div>

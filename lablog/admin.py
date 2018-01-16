@@ -18,9 +18,9 @@ admin.site.register(Feedback)
 
 class RecordsInline(admin.TabularInline):
     """
-    Defines format of inline experiment insertion (used in AuthorAdmin)
+    Defines format of inline experiment insertion (used in SubjectAdmin)
     """
-    model = Experiment
+    model = Record
 
 
 @admin.register(Subject)
@@ -32,10 +32,15 @@ class SubjectAdmin(admin.ModelAdmin):
      - orders fields in detail view (fields), grouping the date fields horizontally
      - adds inline addition of books in author view (inlines)
     """
-    list_display = ('last_name', 'first_name', 'date_of_birth', 'date_of_death')
-    fields = ['first_name', 'last_name', ('date_of_birth', 'date_of_death')]
+    list_display = ('last_name', 'first_name', 'date_of_birth', 'gender') #, 'experiment')
+    fields = ['first_name', 'last_name', ('date_of_birth', 'gender')]
     inlines = [RecordsInline]
 
+class SubjectInline(admin.TabularInline):
+    """
+    Defines format of inline record instance insertion (used in SubjectAdmin)
+    """
+    model = Subject
 
 class RecordInline(admin.TabularInline):
     """
@@ -50,8 +55,9 @@ class ExperimentAdmin(admin.ModelAdmin):
      - fields to be displayed in list view (list_display)
      - adds inline addition of record instances in record view (inlines)
     """
-    list_display = ('title', 'subject', 'display_stimulae')
-    inlines = [RecordInline]
+    list_display = ('title', 'display_stimulae', 'display_feedback') # , 'subject')
+    #inlines = [SubjectInline] # , RecordInline]
+    #fieldsets = ( (None, {'fields': ('')}),)
 
 admin.site.register(Experiment, ExperimentAdmin)
 
@@ -65,14 +71,14 @@ class RecordAdmin(admin.ModelAdmin):
      - filters that will be displayed in sidebar (list_filter)
      - grouping of fields into sections (fieldsets)
     """
-    list_display = ('experiment', 'status', 'borrower','due_back', 'id')
+    list_display = ('subject', 'experiment', 'status', 'attendant', 'imprint', 'id')
     list_filter = ('status', 'due_back')
     
     fieldsets = (
         (None, {
-            'fields': ('experiment','imprint', 'id')
+            'fields': ('experiment', 'subject', 'imprint', 'id')
         }),
-        ('Availability', {
-            'fields': ('status', 'due_back','borrower')
+        ('Details', {
+            'fields': ('status', 'due_back','attendant')
         }),
     )

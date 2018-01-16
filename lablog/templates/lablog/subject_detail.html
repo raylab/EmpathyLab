@@ -3,15 +3,25 @@
 {% block content %}
 
 <h1>Subject: {{ subject }} </h1>
-<p>{{subject.date_of_birth}} - {% if subject.date_of_death %}{{subject.date_of_death}}{% endif %}</p>
+<p>{{subject.date_of_birth}} - {% if subject.gender %}{{subject.gender}}{% endif %}</p>
 
 <div style="margin-left:20px;margin-top:20px">
+<hl>
 <h4>Experiments</h4>
 
 <dl>
 {% for experiment in subject.experiment_set.all %}
   <dt><a href="{% url 'experiment-detail' experiment.pk %}">{{experiment}}</a> ({{experiment.record_set.all.count}})</dt>
   <dd>{{experiment.summary}}</dd>
+{% endfor %}
+</dl>
+<hl>
+<h4>Records</h4>
+
+<dl>
+{% for record in subject.record_set.all %}
+  <dt><a href="{% url 'record-detail' record.id %}">{{record.imprint}}</a></dt>
+  <dd>Attendant: {{record.attendant}}</dd>
 {% endfor %}
 </dl>
 

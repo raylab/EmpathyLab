@@ -8,7 +8,7 @@
 
       {% for experiment in experiment_list %}
       <li>
-        <a href="{{ experiment.get_absolute_url }}">{{ experiment.title }}</a> ({{experiment.subject}})
+        <a href="{{ experiment.get_absolute_url }}">{{ experiment.title }}</a> ({{experiment.summary}})
       </li>
       {% endfor %}
 

@@ -9,9 +9,7 @@
 
   {% for subject in subject_list %}
     <li>
-      <a href="{{ subject.get_absolute_url }}">
-      {{ subject }} ({{subject.date_of_birth}} - {% if subjectr.date_of_death %}{{subject.date_of_death}}{% endif %})
-      </a>
+      <a href="{{ subject.get_absolute_url }}">{{ subject }} ({{subject.date_of_birth}}, {{subject.gender}})</a>
     </li>
   {% endfor %}
 

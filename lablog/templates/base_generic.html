@@ -24,12 +24,15 @@
     <li><a href="{% url 'index' %}">Home</a></li>
     <li><a href="{% url 'experiments' %}">All Experiments</a></li>
     <li><a href="{% url 'subjects' %}">All subjects</a></li>
+    <li><a href="{% url 'stimulaes' %}">All stimulaes</a></li>
+    <li><a href="{% url 'feedbacks' %}">All feedbaks</a></li>
+    <li><a href="{% url 'records' %}">All records</a></li>
   </ul>
  
   <ul class="sidebar-nav">
    {% if user.is_authenticated %}
      <li>User: {{ user.get_username }}</li>
-     <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
+     <li><a href="{% url 'my-records' %}">My records</a></li>
      <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
    {% else %}
      <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
@@ -41,7 +44,7 @@
    <ul class="sidebar-nav">
    <li>Staff</li>
    {% if perms.lablog.can_mark_returned %}
-   <li><a href="{% url 'all-borrowed' %}">All borrowed</a></li>
+   <li><a href="{% url 'all-records' %}">All records</a></li>
    {% endif %}
    </ul>
     {% endif %}

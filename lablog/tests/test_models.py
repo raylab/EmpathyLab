@@ -26,10 +26,10 @@ class SubjectModelTest(TestCase):
         field_label = subject._meta.get_field('date_of_birth').verbose_name
         self.assertEquals(field_label,'date of birth')
 
-    def test_date_of_death_label(self):
+    def test_gender_label(self):
         subject=Subject.objects.get(id=1)
-        field_label = subject._meta.get_field('date_of_death').verbose_name
-        self.assertEquals(field_label,'died')
+        field_label = subject._meta.get_field('gender').verbose_name
+        self.assertEquals(field_label,'gender')
 
     def test_first_name_max_length(self):
         subject=Subject.objects.get(id=1)

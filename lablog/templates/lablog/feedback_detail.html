@@ -6,13 +6,5 @@
     <p>Attendant: {{record.attendant}}</p>
     <p{% if record.is_overdue %} class="text-danger"{% endif %}>Due date: {{record.due_back}}</p>
     <p>{{record.experiment.summary}}</p>
-<!--    <form action="" method="post">
-        {% csrf_token %}
-        <table>
-        {{ form }}
-        </table>
-        <input type="submit" value="Submit" />
-    </form>
--->
 {% endblock %}
 
