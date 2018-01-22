@@ -1,14 +1,22 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>All Stimulaes</h1>
+<h1>All Stimulaes</h1>
 
+{% if stimulae_list %}
+<ul>
+{% for stimulae in stimulae_list %}
+<li>
+      <a href="{{ stimulae.get_absolute_url }}">{{ stimulae }}</a>
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>There are no stimulae.</p>
+{% endif %}
 
-    <ul>
-
-    </ul>
-
-
-      <p>There are no stimulae.</p>
+<form>
+<input type="button" value="Create new stimulae" onclick="window.location.href='{% url 'stimulae_create'%}'" />
+</form>   
       
 {% endblock %}

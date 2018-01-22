@@ -30,6 +30,19 @@ class Feedback(models.Model):
         """
         return self.name
         
+
+class Observation(models.Model):
+    """
+    Model representing a feedback arrangement.
+    """
+    name = models.CharField(max_length=200, help_text="Enter a observation arrangement.)")
+    
+    def __str__(self):
+        """
+        String for representing the Model object (in Admin site etc.)
+        """
+        return self.name
+
         
 class Experiment(models.Model):
     """
@@ -123,9 +136,10 @@ class Record(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text="Unique ID for this particular record across whole log")
     experiment = models.ForeignKey(Experiment, on_delete=models.SET_NULL, null=True) 
     imprint = models.CharField(max_length=200)
-    due_back = models.DateField(null=True, blank=True)
+    rec_date = models.DateField(null=True, blank=True)
     attendant = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True)
+    observation = models.ForeignKey(Observation, on_delete=models.SET_NULL, null=True, blank=True)
     
    # @property
    # def is_overdue(self):

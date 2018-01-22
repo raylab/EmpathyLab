@@ -72,13 +72,13 @@ class RecordAdmin(admin.ModelAdmin):
      - grouping of fields into sections (fieldsets)
     """
     list_display = ('subject', 'experiment', 'status', 'attendant', 'imprint', 'id')
-    list_filter = ('status', 'due_back')
+    list_filter = ('status', 'rec_date')
     
     fieldsets = (
         (None, {
-            'fields': ('experiment', 'subject', 'imprint', 'id')
+            'fields': ('experiment', 'subject', 'imprint', 'id','observation')
         }),
         ('Details', {
-            'fields': ('status', 'due_back','attendant')
+            'fields': ('status', 'rec_date','attendant')
         }),
     )

@@ -1,14 +1,19 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>All Feedbacks</h1>
-
-    {% if record_list %}
+<h1>All Feedbacks</h1>
+  {% if feedback_list %}
     <ul>
-
+    {% for feedback in feedback_list %}
+      <li>
+        <a href="{{ feedback.get_absolute_url }}">{{ feedback }}</a>
+      </li>
+    {% endfor %}
     </ul>
-
-    {% else %}
-      <p>There are no experiment borrowed.</p>
-    {% endif %}       
+  {% else %}
+    <p>There are no feedback arrangements.</p>
+  {% endif %}       
+<form>
+    <input type="button" value="Create new feedback" onclick="window.location.href='{% url 'feedback_create'%}'" />
+</form>   
 {% endblock %}

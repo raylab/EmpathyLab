@@ -18,7 +18,9 @@
   <p>There are no subjects available.</p>
 {% endif %}
         
-        
+    <form>
+    <input type="button" value="Register new subject" onclick="window.location.href='{% url 'subject_create'%}'" />
+    </form>   
         
 {% endblock %}
 

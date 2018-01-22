@@ -1,14 +1,21 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>All Records</h1>
 
-    {% if record_list %}
+<h1>All Records</h1>
+  {% if record_list %}
     <ul>
-
+    {% for record in record_list %}
+      <li>
+        <a href="{{ record.get_absolute_url }}">{{ record }}</a>
+      </li>
+    {% endfor %}
     </ul>
-
-    {% else %}
-      <p>There are no experiment borrowed.</p>
-    {% endif %}       
+  {% else %}
+    <p>There are no records.</p>
+  {% endif %}  
+    
+<form>
+    <input type="button" value="Create new record" onclick="window.location.href='{% url 'record_create'%}'" />
+  </form>     
 {% endblock %}

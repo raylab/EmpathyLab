@@ -25,10 +25,14 @@ urlpatterns += [
 
 
 # Add URLConf for librarian to renew a record.
-urlpatterns += [   
+urlpatterns += [  
     #url(r'^record/(?P<pk>[-\w]+)/renew/$', views.renew_record_librarian, name='renew-record-librarian'),
 ]
 
+# Add URLConf to create, record.
+urlpatterns += [  
+    url(r'^record/create/$', views.RecordCreate.as_view(), name='record_create'),
+]
 
 # Add URLConf to create, update, and delete subjects
 urlpatterns += [  
@@ -46,7 +50,7 @@ urlpatterns += [
 
 # Add URLConf to create, update, and delete subjects
 urlpatterns += [  
-    url(r'^stimulae/create/$', views.StimulaeCreate.as_view(), name='stimulaet_create'),
+    url(r'^stimulae/create/$', views.StimulaeCreate.as_view(), name='stimulae_create'),
     url(r'^stimulae/(?P<pk>\d+)/update/$', views.StimulaeUpdate.as_view(), name='stimulae_update'),
     url(r'^stimulae/(?P<pk>\d+)/delete/$', views.StimulaeDelete.as_view(), name='stimulae_delete'),
 ]

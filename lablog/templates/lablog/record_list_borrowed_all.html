@@ -1,19 +1,18 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>All Records</h1>
+    <h1>All Records made by attendane</h1>
 
     {% if record_list %}
     <ul>
 
       {% for record in record_list %} 
-      <li class="{% if record.is_overdue %}text-danger{% endif %}">
-        <a href="{% url 'experiment-detail' record.experiment.pk %}">{{record.experiment.title}}</a> ({{ record.due_back }}) {% if user.is_staff %}- {{ record.attendant }}{% endif %} {% if perms.lablog.can_mark_returned %}- <a href="{% url 'renew-record-librarian' record.id %}">Renew</a>  {% endif %}
+        <a href="{% url 'experiment-detail' record.experiment.pk %}">{{record.experiment.title}}</a>  {% if user.is_staff %}- {{ record.attendant }}{% endif %} {% if perms.lablog.can_mark_returned %}- <a href="{% url 'renew-record-librarian' record.id %}">Renew</a>  {% endif %}
       </li>
       {% endfor %}
     </ul>
 
     {% else %}
-      <p>There are no experiment borrowed.</p>
+      <p>There are no records made by {{ user }}.</p>
     {% endif %}       
 {% endblock %}

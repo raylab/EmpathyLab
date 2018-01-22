@@ -1,18 +1,84 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+<script>
+function openPage(pageName, elmnt, color) {
+    // Hide all elements with class="tabcontent" by default */
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+
+    // Remove the background color of all tablinks/buttons
+    tablinks = document.getElementsByClassName("tablink");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].style.backgroundColor = "";
+    }
+
+    // Show the specific tab content
+    document.getElementById(pageName).style.display = "block";
+
+    // Add the specific color to the button used to open the tab content
+    elmnt.style.backgroundColor = color;
+}
+
+// Get the element with id="defaultOpen" and click on it
+document.getElementById("defaultOpen").click(); 
+</script>
 
 <h1>Title: {{ experiment.title }}</h1>
-
+<div style="margin-left:20px;margin-top:20px">
 <p><strong>Summary:</strong> {{ experiment.summary }}</p>
 <p><strong>ISBN:</strong> {{ experiment.isbn }}</p> 
-<p><strong>Feedback:</strong> {{ experiment.feedback }}</p>  
-<p><strong>Stimulae:</strong> {% for stimulae in experiment.stimulae.all %}{{stimulae}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
 
-<div style="margin-left:20px;margin-top:20px">
+<div class="tab">
+  <button class="tablink" onclick="openPage('Feedback', this, 'DarkCyan')" id="defaultOpen">Feedback</button>
+  <button class="tablink" onclick="openPage('Stimulae', this, 'DarkCyan')">Stimulae</button>
+  <button class="tablink" onclick="openPage('Subjects', this, 'DarkCyan')">Subjects</button>
+  <button class="tablink" onclick="openPage('Records', this, 'DarkCyan')">Records</button>
+</div>
+
+<div id="Feedback" class="tabcontent">
+<p><h4>Feedback:</h4> </p> 
+<hr>
+<table>
+ <tr>
+<th>
+{% for feedback in experiment.feedback.all %}{{ feedback }}{% if not forloop.last %}, {% endif %}{% endfor %}</p> 
+</th>
+<th>
+<form>
+    <input type="button" value="Add new feedback" onclick="window.location.href='{% url 'feedback_create'%}'" />
+    </form>  
+</th>
+</tr>
+</table>
+</div>
+
+<div id="Stimulae" class="tabcontent">
+<p><h4>Stimulae:</h4> 
+<hr>
+<table>
+ <tr>
+<th>
+{% for stimulae in experiment.stimulae.all %}{{stimulae}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
+</th>
+<th>
+<form>
+    <input type="button" value="Add new stimulae" onclick="window.location.href='{% url 'stimulae_create'%}'" />
+    </form>  
+</th>
+</tr>
+</table>
+</div>
+
+<div id="Subjects" class="tabcontent">
 <h4>Subjects</h4>
 <hr>
-
+<table>
+ <tr>
+<th>
 <ul>
 {% for subject in experiment.subjects.all %}
   <li>
@@ -20,17 +86,44 @@
   </li>
 {% endfor %}
 </ul>
+</th>
+<th>
+<form>
+    <input type="button" value="Register new subject" onclick="window.location.href='{% url 'subject_create'%}'" />
+</form>
+</th>
+</tr>
+</table>   
 <hr>
+</div>
+
+<div id="Records" class="tabcontent">
 <h4>Records</h4>
+<hr>
+<table>
 
 {% for record in experiment.record_set.all %}
-<hr>
-<p class="{% if copy.status == 'a' %}text-success{% elif record.status == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ record.get_status_display }}</p>
-{% if record.status != 'a' %}<p><strong>Due to be returned:</strong> {{record.due_back}}</p>{% endif %}
+  <tr>
+    <th>
+       <p class="{% if record.status == 'a' %}text-success{% elif record.status == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ record.get_status_display }}</p>
+{% if record.status != 'a' %}{% endif %}
 <p><strong>Imprint:</strong> {{record.imprint}}</p>
-<p class="text-muted"><strong>Id:</strong> {{record.id}}</p>
-
+<a href="{{ record.get_absolute_url }}">{{ record }}</a>
+</th>
+</tr>
 {% endfor %}
+ <tr>
+    <th>
+<form>
+    <input type="button" value="Create new record" onclick="window.location.href='{% url 'record_create'%}'" />
+  </form> 
+</th>
+</tr>
+</table>
+</div>
+
+
+
 </div>
 {% endblock %}
 

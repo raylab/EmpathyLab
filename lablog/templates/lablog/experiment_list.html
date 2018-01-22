@@ -16,6 +16,10 @@
 
     {% else %}
       <p>There are no experiments yet.</p>
-    {% endif %}       
+    {% endif %}  
+
+     <form>
+    <input type="button" value="Create new experiment" onclick="window.location.href='{% url 'experiment_create'%}'" />
+    </form>      
 {% endblock %}
 
