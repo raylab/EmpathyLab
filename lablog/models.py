@@ -129,6 +129,8 @@ from datetime import date
 
 from django.contrib.auth.models import User #Required to assign User as a attendant
 
+import plyvel
+
 class Record(models.Model):
     """
     Model representing a specific record.
@@ -159,13 +161,17 @@ class Record(models.Model):
     class Meta:
         #ordering = ["due_back"]
         permissions = (("can_change_status", "Set record status"),)   
-
+    
+    def get_recorddb(self):
+        myStr = 'records/'+str(self.id)+'db'
+        db = plyvel.DB(myStr, create_if_missing=True)
+        return db
+    
     def get_absolute_url(self):
         """
         Returns the url to access a particular subject instance.
         """
         return reverse('record-detail', args=[str(self.id)])
-
 
     def __str__(self):
         """

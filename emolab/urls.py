@@ -29,6 +29,14 @@ urlpatterns += [
     url(r'^lablog/', include('lablog.urls')),
 ]
 
+urlpatterns += [
+    url(r'^liveblog/', include('liveblog.urls')),
+]
+
+#urlpatterns += [
+#    url(r'^values/', include('values.urls')),
+#]
+
 
 # Use static() to add url mapping to serve static files during development (only)
 from django.conf import settings

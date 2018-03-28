@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions', 
     'lablog.apps.LablogConfig', #This object was created for us in /lablogs/apps.py
+    'channels',
+    'liveblog',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +57,24 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'emolab.urls'
+ROOT_URLCONF = 'emolab.urls' #NEED TO BE CONFIGURED PROPERLY
+
+
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
+
+# Channel layer definitions
+# http://channels.readthedocs.org/en/latest/deploying.html#setting-up-a-channel-backend
+CHANNEL_LAYERS = {
+    'default': {
+        # This example app uses the Redis channel layer implementation asgi_redis
+        'BACKEND': 'asgi_redis.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(redis_host, 6379)],
+        },
+        'ROUTING': 'emolab.routing.channel_routing',
+    },
+}
+
 
 TEMPLATES = [
     {
@@ -78,14 +97,20 @@ WSGI_APPLICATION = 'emolab.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+#NEED TO BE CONFIGURED FOR USE WITH DATABINDING AND CHANNELS
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    },
+#    'liveblog': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': os.path.join(BASE_DIR, 'lbdb.sqlite3'),
+#    },
 }
 
+#DATABASE_ROUTERS = ['emolab.router.EmoLabRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators

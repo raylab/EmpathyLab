@@ -87,6 +87,7 @@ class SubjectDetailView(generic.DetailView):
     """
     model = Subject
 
+#from values.models import IntegerValue
 
 class RecordListView(generic.ListView):
     """
@@ -100,7 +101,6 @@ class RecordDetailView(generic.DetailView):
     Generic class-based list view for a list of records.
     """
     model = Record
-
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 

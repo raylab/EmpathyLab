@@ -2,12 +2,16 @@
 
 {% block content %}
     <h1>Experiment: {{record.experiment.title}}</h1>
+    <p><h4>UID: {{record.id}}</h4></p>
     <p><h4>Subject: {{record.subject}}</h4></p>
     <p><h4>Attendant: {{record.attendant}}</h4></p>
     <p><h4>Date: {{record.rec_date}}</h4></p>
     <p><h4>Experiment Summary:{{record.experiment.summary}}</h4></p>
 <p><h4>Stimulae:{{record.experiment.display_stimulae}}</h4></p>
 <p><h4>Feedback:{{record.experiment.display_feedback}}</h4></p>
+<p>
+<p>
 
+<p><h4>Record LevelDB: {{record.get_recorddb}}</h4></p> 
 {% endblock %}
 

@@ -1,0 +1,79 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Experiment: {{record.experiment.title}}</h1>
+    <p><h4>UID: {{record.id}}</h4></p>
+    <p><h4>Subject: {{record.subject}}</h4></p>
+    <p><h4>Attendant: {{record.attendant}}</h4></p>
+    <p><h4>Date: {{record.rec_date}}</h4></p>
+    <p><h4>Experiment Summary:{{record.experiment.summary}}</h4></p>
+<p><h4>Stimulae:{{record.experiment.display_stimulae}}</h4></p>
+<p><h4>Feedback:{{record.experiment.display_feedback}}</h4></p>
+<p>
+<p>
+
+<p><h4>Record LevelDB: {{record.get_recorddb}}</h4></p> 
+
+   <!--<p>Here:{{ record.values }}</p>-->
+
+    <div id="values">
+        {% for z in record.values %}
+            <p data-value-id='{{ z.pk }}'>
+                <label>{{ z.name }}</label>
+                <input type='range' value='{{ z.value }}' min='0' max='100'>
+                <output>{{ z.value }}</output>
+            </p>
+        {% empty %}
+            <p class="empty">No values yet.</p>
+        {% endfor %}
+    </div>
+
+<script>
+        $(function () {
+            var ws_path =  "/stream/";
+            console.log("Connecting to " + ws_path);
+
+            var webSocketBridge = new channels.WebSocketBridge();
+            webSocketBridge.connect(ws_path);
+            webSocketBridge.listen();
+            webSocketBridge.demultiplex('intval', function(payload, streamName) {
+                console.log("And Action is " + payload.action);
+                // Handle different actions
+                if (payload.action == "create") {
+                    // Create the new integer value
+                    var content = "<p data-value-id='" + payload.pk + "'><label>" + payload.data.name + "</label> <input type='range' value='" + payload.data.value + "' min='0' max='100'><output>" + payload.data.value + "</output>";
+                    $("#values").append(content);
+                    // Remove empty message
+                    $("#values .empty").remove();
+                } else if (payload.action == "update") {
+                    $("p[data-value-id=" + payload.pk + "] label").text(payload.data.name);
+                    $("p[data-value-id=" + payload.pk + "] input").val(payload.data.value);
+                    $("p[data-value-id=" + payload.pk + "] output").val(payload.data.value);
+                } else if (payload.action == "delete") {
+                    $("p[data-value-id=" + payload.pk + "]").remove();
+                } else {
+                    console.log("Unknown action " + payload.action);
+                }
+            });
+
+            // Bind changing the slider value
+            $("#values").on("change", "input", function () {
+                $(this).parent().find("output").val($(this).val());
+                webSocketBridge.stream('intval').send({
+                    "pk": $(this).parent().attr("data-value-id"),
+                    "action": "update",
+                    "data": {
+                        "value": $(this).val(),
+                    }
+                });
+            });
+
+            // Helpful debugging
+            webSocketBridge.socket.addEventListener('open', function() { console.log("Connected to notification socket"); });
+            webSocketBridge.socket.addEventListener('close', function() { console.log("Disconnected to notification socket"); });
+        });
+    </script>
+
+
+{% endblock %}
+
