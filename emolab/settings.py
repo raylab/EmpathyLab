@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions', 
     'lablog.apps.LablogConfig', #This object was created for us in /lablogs/apps.py
-    'channels',
-    'liveblog',
 ]
 
 MIDDLEWARE = [
@@ -58,23 +56,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'emolab.urls' #NEED TO BE CONFIGURED PROPERLY
-
-
-redis_host = os.environ.get('REDIS_HOST', 'localhost')
-
-# Channel layer definitions
-# http://channels.readthedocs.org/en/latest/deploying.html#setting-up-a-channel-backend
-CHANNEL_LAYERS = {
-    'default': {
-        # This example app uses the Redis channel layer implementation asgi_redis
-        'BACKEND': 'asgi_redis.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [(redis_host, 6379)],
-        },
-        'ROUTING': 'emolab.routing.channel_routing',
-    },
-}
-
 
 TEMPLATES = [
     {
@@ -104,13 +85,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
-#    'liveblog': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'lbdb.sqlite3'),
-#    },
 }
 
-#DATABASE_ROUTERS = ['emolab.router.EmoLabRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -144,30 +120,24 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
 LOGIN_REDIRECT_URL = '/'
 
 # Add to test email:
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
-
 # Heroku: Update database configuration from $DATABASE_URL.
 import dj_database_url
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 # The absolute path to the directory where collectstatic will collect static files for deployment.
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # The URL to use when referring to static files (where they will be served from)
 STATIC_URL = '/static/'
-
 
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
