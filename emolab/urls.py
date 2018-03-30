@@ -13,30 +13,16 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
 from django.contrib import admin
-
-# Use include() to add URLS from the lablog application and authentication system
-from django.conf.urls import include
-
+from django.urls import path, include
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-]
-
-
-urlpatterns += [
-    url(r'^lablog/', include('lablog.urls')),
+    path('admin/', admin.site.urls),
 ]
 
 urlpatterns += [
-    url(r'^liveblog/', include('liveblog.urls')),
+    path('lablog/', include('lablog.urls')),
 ]
-
-#urlpatterns += [
-#    url(r'^values/', include('values.urls')),
-#]
-
 
 # Use static() to add url mapping to serve static files during development (only)
 from django.conf import settings
@@ -44,16 +30,13 @@ from django.conf.urls.static import static
 
 urlpatterns+= static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-
 #Add URL maps to redirect the base URL to our application
 from django.views.generic import RedirectView
 urlpatterns += [
-    url(r'^$', RedirectView.as_view(url='/lablog/', permanent=True)),
+    path('', RedirectView.as_view(url='/lablog/', permanent=True)),
 ]
-
-
 
 #Add Django site authentication urls (for login, logout, password management)
 urlpatterns += [
-    url('^accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
