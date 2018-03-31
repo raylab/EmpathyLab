@@ -17,16 +17,9 @@ urlpatterns = [
     url(r'^feedback/(?P<pk>\d+)$', views.FeedbackDetailView.as_view(), name='feedback-detail'),
 ]
 
-
 urlpatterns += [   
     url(r'^myrecords/$', views.RecordsByUserListView.as_view(), name='my-records'),
     url(r'^records/$', views.RecordsAllListView.as_view(), name='all-records'),
-]
-
-
-# Add URLConf for librarian to renew a record.
-urlpatterns += [  
-    #url(r'^record/(?P<pk>[-\w]+)/renew/$', views.renew_record_librarian, name='renew-record-librarian'),
 ]
 
 # Add URLConf to create, record.

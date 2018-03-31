@@ -97,7 +97,7 @@ class Subject(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
-    experiments = models.ManyToManyField(Experiment) # , on_delete=models.SET_NULL, null=True)
+    experiments = models.ManyToManyField(Experiment, blank=True) # , on_delete=models.SET_NULL, null=True)
 
     GENDER = (
         ('M', 'Male'),
@@ -143,13 +143,6 @@ class Record(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True)
     observation = models.ForeignKey(Observation, on_delete=models.SET_NULL, null=True, blank=True)
     
-   # @property
-   # def is_overdue(self):
-   #     if self.due_back and date.today() > self.due_back:
-   #         return True
-   #     return False
-        
-
     RECORD_STATUS = (
         ('d', 'Maintenance'),
         ('a', 'Available'),
@@ -159,7 +152,6 @@ class Record(models.Model):
     status= models.CharField(max_length=1, choices=RECORD_STATUS, blank=True, default='d', help_text='Record status')
 
     class Meta:
-        #ordering = ["due_back"]
         permissions = (("can_change_status", "Set record status"),)   
     
     def get_recorddb(self):
