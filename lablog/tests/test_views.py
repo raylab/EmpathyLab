@@ -69,14 +69,12 @@ class LoanedRecordsByUserListViewTest(TestCase):
         test_subject = Subject.objects.create(
             first_name='John', last_name='Smith')
         test_stimulae = Stimulae.objects.create(name='Fantasy')
-        test_feedback = Feedback.objects.create(name='English')
         test_record = Experiment.objects.create(
             title='Experiment Title',
             summary='My experiment summary',
             isbn='ABCDEFG')
         test_record.save()
         test_record.subjects.add(test_subject)
-        test_record.feedback.add(test_feedback)
         # Create stimulae as a post-step
         stimulae_objects_for_record = Stimulae.objects.all()
         # test_record.stimulae = stimulae_objects_for_record ## AB fixed
@@ -235,3 +233,51 @@ class SubjectCreateViewTest(TestCase):
         # created
         self.assertEqual(resp.status_code, 302)
         self.assertTrue(resp.url.startswith('/lablog/subject/'))
+
+
+class FeedbackCreateViewTest(TestCase):
+    """
+    Test case for Feedback creation view.
+    """
+
+    def setUp(self):
+        User.objects.create_user(username='unprivileged', password='DAU12345')
+
+        user2 = User.objects.create_user(
+            username='scientist', password='DAU12345')
+        user2.user_permissions.add(
+            Permission.objects.get(codename='can_change_status'))
+        user2.save()
+
+    def test_redirect_if_not_logged_in(self):
+        resp = self.client.get(reverse('feedback_create'))
+        self.assertRedirects(
+            resp,
+            '/accounts/login/?next=' +
+            reverse('feedback_create'))
+
+    def test_redirect_if_logged_in_but_not_correct_permission(self):
+        login = self.client.login(username='unprivileged', password='DAU12345')
+        resp = self.client.get(reverse('feedback_create'))
+        self.assertRedirects(
+            resp,
+            '/accounts/login/?next=' +
+            reverse('feedback_create'))
+
+    def test_logged_in_with_permission(self):
+        login = self.client.login(username='scientist', password='DAU12345')
+        resp = self.client.get(reverse('feedback_create'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'lablog/feedback_form.html')
+
+    def test_redirects_to_detail_view_on_success(self):
+        login = self.client.login(username='scientist', password='DAU12345')
+        form_data = {
+            'electrode1': '1',
+            'electrode2': '2',
+            'electrode3': '3',
+            'electrode4': '4',
+            'analysis': 'default',
+        }
+        resp = self.client.post(reverse('feedback_create'), form_data)
+        self.assertRedirects(resp, reverse('feedback-detail', args=['1']))

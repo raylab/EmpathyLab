@@ -25,14 +25,31 @@ class Feedback(models.Model):
     """
     Model representing a feedback arrangement.
     """
-    name = models.CharField(max_length=200,
-                            help_text="Enter a feedback arrangement.)")
+    electrode1 = models.IntegerField(
+        default=1, help_text='Position of first electrode')
+    electrode2 = models.IntegerField(
+        default=1, help_text='Position of second electrode')
+    electrode3 = models.IntegerField(
+        default=1, help_text='Position of third electrode')
+    electrode4 = models.IntegerField(
+        default=1, help_text='Position of fourth electrode')
+    analysis = models.CharField(
+        max_length=100,
+        default='default',
+        help_text='Analysis setup')
 
     def __str__(self):
         """
-        String for representing the Model object (in Admin site etc.)
+        String for representing Feedback object.
         """
-        return self.name
+        return 'Feedback {self.id} ({self.electrode1}, {self.electrode2}, {self.electrode3}, {self.electrode4}, \"{self.analysis}\")'.format(
+            self=self)
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular feedback instance.
+        """
+        return reverse('feedback-detail', args=[str(self.id)])
 
 
 class Observation(models.Model):

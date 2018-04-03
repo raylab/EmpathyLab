@@ -210,7 +210,7 @@ class FeedbackUpdate(PermissionRequiredMixin, UpdateView):
 
 class FeedbackDelete(PermissionRequiredMixin, DeleteView):
     model = Feedback
-    success_url = reverse_lazy('feedback')
+    success_url = reverse_lazy('feedbacks')
     permission_required = 'lablog.can_change_status'
 
 

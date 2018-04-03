@@ -1,8 +1,6 @@
 from django.test import TestCase
-
-# Create your tests here.
-
-from lablog.models import Subject
+from lablog.models import Subject, Feedback
+from django.urls import reverse
 
 
 class SubjectModelTest(TestCase):
@@ -59,3 +57,37 @@ class SubjectModelTest(TestCase):
     def test_subject_has_notes(self):
         subject = Subject.objects.get(id=1)
         self.assertEquals(subject.notes, 'TestNotes')
+
+
+class FeedbackModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Feedback.objects.create(
+            electrode1=1,
+            electrode2=2,
+            electrode3=3,
+            electrode4=4,
+            analysis='AnalysisText')
+
+    def test_has_electorode_positions(self):
+        feedback = Feedback.objects.get(id=1)
+        self.assertEquals(feedback.electrode1, 1)
+        self.assertEquals(feedback.electrode2, 2)
+        self.assertEquals(feedback.electrode3, 3)
+        self.assertEquals(feedback.electrode4, 4)
+
+    def test_has_analysis_text(self):
+        feedback = Feedback.objects.get(id=1)
+        self.assertEquals(feedback.analysis, 'AnalysisText')
+
+    def test_representation_includes_positions_and_analysis(self):
+        feedback = Feedback.objects.get(id=1)
+        self.assertEquals(
+            'Feedback 1 (1, 2, 3, 4, "AnalysisText")',
+            str(feedback))
+
+    def test_has_absolute_url(self):
+        feedback = Feedback.objects.get(id=1)
+        self.assertEquals(
+            feedback.get_absolute_url(), reverse(
+                'feedback-detail', args=['1']))
