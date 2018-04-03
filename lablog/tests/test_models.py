@@ -10,7 +10,10 @@ class SubjectModelTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Set up non-modified objects used by all test methods
-        Subject.objects.create(first_name='Big', last_name='Bob')
+        Subject.objects.create(
+            first_name='Big',
+            last_name='Bob',
+            notes='TestNotes')
 
     def test_first_name_label(self):
         subject = Subject.objects.get(id=1)
@@ -52,3 +55,7 @@ class SubjectModelTest(TestCase):
         subject = Subject.objects.get(id=1)
         # This will also fail if the urlconf is not defined.
         self.assertEquals(subject.get_absolute_url(), '/lablog/subject/1')
+
+    def test_subject_has_notes(self):
+        subject = Subject.objects.get(id=1)
+        self.assertEquals(subject.notes, 'TestNotes')

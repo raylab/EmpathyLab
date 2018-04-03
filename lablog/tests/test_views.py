@@ -186,24 +186,24 @@ class SubjectCreateViewTest(TestCase):
             username='testuser2', password='DAU12345')
         test_user2.save()
 
-        test_user2.user_permissions.add(
-            Permission.objects.get(
-                codename='can_change_status'))
+        test_user2.user_permissions.add(Permission.objects.get(
+            codename='can_change_status'))
         test_user2.save()
-        # Create a experiment
-        test_subject = Subject.objects.create(
-            first_name='John', last_name='Smith')
 
     def test_redirect_if_not_logged_in(self):
         resp = self.client.get(reverse('subject_create'))
         self.assertRedirects(
-            resp, '/accounts/login/?next=/lablog/subject/create/')
+            resp,
+            '/accounts/login/?next=' +
+            reverse('subject_create'))
 
     def test_redirect_if_logged_in_but_not_correct_permission(self):
         login = self.client.login(username='testuser1', password='DAU12345')
         resp = self.client.get(reverse('subject_create'))
         self.assertRedirects(
-            resp, '/accounts/login/?next=/lablog/subject/create/')
+            resp,
+            '/accounts/login/?next=' +
+            reverse('subject_create'))
 
     def test_logged_in_with_permission(self):
         login = self.client.login(username='testuser2', password='DAU12345')

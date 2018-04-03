@@ -108,8 +108,6 @@ class Subject(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
-    # , on_delete=models.SET_NULL, null=True)
-    experiments = models.ManyToManyField(Experiment, blank=True)
 
     GENDER = (
         ('M', 'Male'),
@@ -122,6 +120,8 @@ class Subject(models.Model):
         blank=True,
         default='O',
         help_text='Subject Gender')
+
+    notes = models.TextField(blank=True)
 
     class Meta:
         ordering = ['last_name']
