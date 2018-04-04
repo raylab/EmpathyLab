@@ -14,11 +14,26 @@ class Stimulae(models.Model):
         max_length=200,
         help_text="Enter stimulate description and resourse reference")
 
+    media1 = models.FileField(
+        default='/dev/null',
+        help_text='First media file')
+
+    media2 = models.FileField(
+        default='/dev/null',
+        null=True,
+        help_text='Optional media file')
+
     def __str__(self):
         """
         String for representing the Model object (in Admin site etc.)
         """
         return self.name
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular stimulae instance.
+        """
+        return reverse('stimulae-detail', args=[str(self.id)])
 
 
 class Feedback(models.Model):

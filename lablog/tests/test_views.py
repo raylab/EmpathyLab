@@ -281,3 +281,49 @@ class FeedbackCreateViewTest(TestCase):
         }
         resp = self.client.post(reverse('feedback_create'), form_data)
         self.assertRedirects(resp, reverse('feedback-detail', args=['1']))
+
+
+class StimulaeCreateViewTest(TestCase):
+    """
+    Test case for Stimulae creation view.
+    """
+
+    def setUp(self):
+        User.objects.create_user(username='unprivileged', password='DAU12345')
+
+        user2 = User.objects.create_user(
+            username='scientist', password='DAU12345')
+        user2.user_permissions.add(
+            Permission.objects.get(codename='can_change_status'))
+        user2.save()
+
+    def test_redirect_if_not_logged_in(self):
+        resp = self.client.get(reverse('stimulae_create'))
+        self.assertRedirects(
+            resp,
+            '/accounts/login/?next=' +
+            reverse('stimulae_create'))
+
+    def test_redirect_if_logged_in_but_not_correct_permission(self):
+        login = self.client.login(username='unprivileged', password='DAU12345')
+        resp = self.client.get(reverse('stimulae_create'))
+        self.assertRedirects(
+            resp,
+            '/accounts/login/?next=' +
+            reverse('stimulae_create'))
+
+    def test_logged_in_with_permission(self):
+        login = self.client.login(username='scientist', password='DAU12345')
+        resp = self.client.get(reverse('stimulae_create'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, 'lablog/stimulae_form.html')
+
+    def test_redirects_to_detail_view_on_success(self):
+        login = self.client.login(username='scientist', password='DAU12345')
+        form_data = {
+            'name': 'test_stimulae',
+            'media1': 'somefile.mov',
+            'media2': 'somefile.mp3',
+        }
+        resp = self.client.post(reverse('stimulae_create'), form_data)
+        self.assertRedirects(resp, reverse('stimulae-detail', args=['1']))

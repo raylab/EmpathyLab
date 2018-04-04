@@ -1,6 +1,8 @@
 from django.test import TestCase
-from lablog.models import Subject, Feedback
+from lablog.models import Subject, Feedback, Stimulae
 from django.urls import reverse
+from django.core.files.uploadedfile import SimpleUploadedFile
+from unittest import mock
 
 
 class SubjectModelTest(TestCase):
@@ -91,3 +93,48 @@ class FeedbackModelTest(TestCase):
         self.assertEquals(
             feedback.get_absolute_url(), reverse(
                 'feedback-detail', args=['1']))
+
+
+class StimulaeModelTest(TestCase):
+
+    @classmethod
+    def save_side_effect(*args, **kwargs):
+        return str(args[2])
+
+    @classmethod
+    @mock.patch('django.core.files.storage.default_storage._wrapped')
+    def setUpTestData(cls, storage_mock):
+        storage_mock.save = mock.Mock(side_effect=cls.save_side_effect)
+        media1 = SimpleUploadedFile(
+            name='test_video_file.mov',
+            content=b'mov content',
+            content_type='video/mp4')
+        media2 = SimpleUploadedFile(
+            name='test_audio_file.mp3',
+            content=b'mp3 content',
+            content_type='audio/mpeg')
+
+        Stimulae.objects.create(
+            name='Fantasy',
+            media1=media1,
+            media2=media2,
+        )
+
+    def test_has_name(self):
+        stimulae = Stimulae.objects.get(id=1)
+        self.assertEquals(stimulae.name, 'Fantasy')
+
+    def test_has_media_files_assigned(self):
+        stimulae = Stimulae.objects.get(id=1)
+        self.assertIn('test_video_file', stimulae.media1.name)
+        self.assertIn('test_audio_file', stimulae.media2.name)
+
+    def test_representation_is_a_name(self):
+        stimulae = Stimulae.objects.get(id=1)
+        self.assertEquals(stimulae.name, str(stimulae))
+
+    def test_has_absolute_url(self):
+        stimulae = Stimulae.objects.get(id=1)
+        self.assertEquals(
+            stimulae.get_absolute_url(), reverse(
+                'stimulae-detail', args=['1']))
