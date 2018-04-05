@@ -67,21 +67,6 @@ class Feedback(models.Model):
         return reverse('feedback-detail', args=[str(self.id)])
 
 
-class Observation(models.Model):
-    """
-    Model representing a feedback arrangement.
-    """
-    name = models.CharField(
-        max_length=200,
-        help_text="Enter a observation arrangement.)")
-
-    def __str__(self):
-        """
-        String for representing the Model object (in Admin site etc.)
-        """
-        return self.name
-
-
 class Experiment(models.Model):
     """
     Model representing a experiment (but not a specific record).
@@ -91,7 +76,6 @@ class Experiment(models.Model):
         max_length=1000,
         help_text="Enter a brief description of the experiment")
     subjects = models.ManyToManyField('Subject')
-    #subject = models.ForeignKey('Subject', on_delete=models.SET_NULL, null=True)
     isbn = models.CharField(
         'ISBN',
         max_length=13,
@@ -107,7 +91,6 @@ class Experiment(models.Model):
         """
         return ', '.join([stimulae.name
                           for stimulae in self.stimulae.all()[: 3]])
-        display_stimulae.short_description = 'Stimulae'
 
     def display_feedback(self):
         """
@@ -115,7 +98,6 @@ class Experiment(models.Model):
         """
         return ', '.join([feedback.name
                           for feedback in self.feedback.all()[: 3]])
-        display_feedback.short_description = 'Feedback'
 
     class Meta:
         ordering = ['title']
@@ -198,11 +180,6 @@ class Record(models.Model):
         blank=True)
     subject = models.ForeignKey(
         Subject,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True)
-    observation = models.ForeignKey(
-        Observation,
         on_delete=models.SET_NULL,
         null=True,
         blank=True)
