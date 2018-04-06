@@ -33,6 +33,4 @@ urlpatterns = [
     path('feedback/create/', views.FeedbackCreate.as_view(), name='feedback_create'),
     path('feedback/<int:pk>/update/', views.FeedbackUpdate.as_view(), name='feedback_update'),
     path('feedback/<int:pk>/delete/', views.FeedbackDelete.as_view(), name='feedback_delete'),
-
-    path('myrecords/', views.RecordsByUserListView.as_view(), name='my-records'),
 ]

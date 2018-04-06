@@ -1,7 +1,8 @@
 from django.test import TestCase
-from lablog.models import Subject, Feedback, Stimulae
+from lablog.models import Subject, Feedback, Stimulae, Record
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from datetime import datetime, timezone
 from unittest import mock
 
 
@@ -138,3 +139,43 @@ class StimulaeModelTest(TestCase):
         self.assertEquals(
             stimulae.get_absolute_url(), reverse(
                 'stimulae-detail', args=['1']))
+
+
+class RecordModelTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        Record.objects.create(
+            EEG='SomeEEG',
+            StartTime=datetime(2002, 12, 25, tzinfo=timezone.utc),
+            StopTime=datetime(2002, 12, 26, tzinfo=timezone.utc),
+            TENSControl='SomeTENS',
+            ObservationMedia1='SomeMedia1',
+            ObservationMedia2='SomeMedia2',
+        )
+
+    def test_has_EEG(self):
+        sut = Record.objects.get(id=1)
+        self.assertEquals(sut.EEG, 'SomeEEG')
+
+    def test_has_time(self):
+        sut = Record.objects.get(id=1)
+        self.assertEquals(
+            datetime(
+                2002,
+                12,
+                25,
+                tzinfo=timezone.utc),
+            sut.StartTime)
+        self.assertEquals(
+            datetime(
+                2002,
+                12,
+                26,
+                tzinfo=timezone.utc),
+            sut.StopTime)
+
+    def test_has_media(self):
+        sut = Record.objects.get(id=1)
+        self.assertEquals(sut.ObservationMedia1, 'SomeMedia1')
+        self.assertEquals(sut.ObservationMedia2, 'SomeMedia2')

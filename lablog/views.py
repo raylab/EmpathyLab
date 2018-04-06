@@ -2,9 +2,16 @@ from django.shortcuts import render
 
 #import pdb; pdb.set_trace()
 
-# Create your views here.
-
 from .models import Experiment, Subject, Record, Stimulae, Feedback
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.contrib.auth.decorators import permission_required
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 
 
 def index(request):
@@ -12,11 +19,8 @@ def index(request):
     View function for home page of site.
     """
     # Generate counts of some of the main objects
-    num_experiments = Experiment.objects.all().count()
-    num_records = Record.objects.all().count()
-    # Available records
-    num_records_available = Record.objects.filter(status__exact='a').count()
-    # The 'all()' is implied by default.
+    num_experiments = Experiment.objects.count()
+    num_records = Record.objects.count()
     num_subjects = Subject.objects.count()
 
     # Number of visits to this view, as counted in the session variable.
@@ -31,13 +35,9 @@ def index(request):
         context={
             'num_experiments': num_experiments,
             'num_records': num_records,
-            'num_records_available': num_records_available,
             'num_subjects': num_subjects,
             'num_visits': num_visits},
     )
-
-
-from django.views import generic
 
 
 class ExperimentListView(generic.ListView):
@@ -99,8 +99,6 @@ class SubjectDetailView(generic.DetailView):
     """
     model = Subject
 
-#from values.models import IntegerValue
-
 
 class RecordListView(generic.ListView):
     """
@@ -117,28 +115,6 @@ class RecordDetailView(generic.DetailView):
     model = Record
 
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-
-
-class RecordsByUserListView(LoginRequiredMixin, generic.ListView):
-    """
-    Generic class-based view listing records to current user.
-    """
-    model = Record
-    template_name = 'lablog/record_list_by_user.html'
-    paginate_by = 10
-
-    def get_queryset(self):
-        return Record.objects.filter(
-            attendant=self.request.user).filter(
-            status__exact='o').order_by('attendant')
-
-
-
-# Added as part of challenge!
-from django.contrib.auth.mixins import PermissionRequiredMixin
-
-
 class RecordsAllListView(PermissionRequiredMixin, generic.ListView):
     """
     Generic class-based view listing all records. Only visible to users with can_mark_returned permission.
@@ -150,51 +126,6 @@ class RecordsAllListView(PermissionRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         return Record.objects.filter(status__exact='o').order_by('due_back')
-
-
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-import datetime
-from django.contrib.auth.decorators import permission_required
-
-# from .forms import NewExperimentForm
-
-#from .forms import RenewBookForm
-
-# @permission_required('lablog.can_mark_returned')
-# def renew_record_librarian(request, pk):
-#    """
-#    View function for renewing a specific Record by attendant
-#    """
-#    record_inst=get_object_or_404(Record, pk = pk)
-#
-#    # If this is a POST request then process the Form data
-#    if request.method == 'POST':
-#
-#        # Create a form instance and populate it with data from the request (binding):
-#        form = RenewBookForm(request.POST)
-#
-#        # Check if the form is valid:
-#        if form.is_valid():
-#            # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
-#            record_inst.due_back = form.cleaned_data['renewal_date']
-#            record_inst.save()
-#
-#            # redirect to a new URL:
-#            return HttpResponseRedirect(reverse('all-borrowed') )
-#
-#    # If this is a GET (or any other method) create the default form
-#    else:
-#        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
-#        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
-#
-# return render(request, 'lablog/record_renew_librarian.html', {'form':
-# form, 'record':record_inst})
-
-
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
 
 
 class FeedbackCreate(PermissionRequiredMixin, CreateView):

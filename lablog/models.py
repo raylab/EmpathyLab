@@ -153,57 +153,20 @@ class Subject(models.Model):
         return '%s, %s' % (self.last_name, self.first_name)
 
 
-import uuid  # Required for unique record instances
-from datetime import date
-
-# Required to assign User as a attendant
-from django.contrib.auth.models import User
-
-import plyvel
-
-
 class Record(models.Model):
     """
     Model representing a specific record.
     """
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4,
-        help_text="Unique ID for this particular record across whole log")
-    experiment = models.ForeignKey(
-        Experiment, on_delete=models.SET_NULL, null=True)
-    imprint = models.CharField(max_length=200)
-    rec_date = models.DateField(null=True, blank=True)
-    attendant = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True)
-    subject = models.ForeignKey(
-        Subject,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True)
 
-    RECORD_STATUS = (
-        ('d', 'Maintenance'),
-        ('a', 'Available'),
-        ('r', 'Restricted'),
-    )
-
-    status = models.CharField(
-        max_length=1,
-        choices=RECORD_STATUS,
-        blank=True,
-        default='d',
-        help_text='Record status')
+    EEG = models.TextField(blank=True)
+    StartTime = models.DateTimeField(null=True, blank=True)
+    StopTime = models.DateTimeField(null=True, blank=True)
+    TENSControl = models.TextField(blank=True)
+    ObservationMedia1 = models.CharField(max_length=200, blank=True)
+    ObservationMedia2 = models.CharField(max_length=200, blank=True)
 
     class Meta:
         permissions = (("can_change_status", "Set record status"),)
-
-    def get_recorddb(self):
-        myStr = 'records/' + str(self.id) + 'db'
-        db = plyvel.DB(myStr, create_if_missing=True)
-        return db
 
     def get_absolute_url(self):
         """
