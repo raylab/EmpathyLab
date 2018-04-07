@@ -67,54 +67,6 @@ class Feedback(models.Model):
         return reverse('feedback-detail', args=[str(self.id)])
 
 
-class Experiment(models.Model):
-    """
-    Model representing a experiment (but not a specific record).
-    """
-    title = models.CharField(max_length=200)
-    summary = models.TextField(
-        max_length=1000,
-        help_text="Enter a brief description of the experiment")
-    subjects = models.ManyToManyField('Subject')
-    isbn = models.CharField(
-        'ISBN',
-        max_length=13,
-        help_text='13 CharacterISBN number')
-    stimulae = models.ManyToManyField(
-        Stimulae, help_text="Select a stimulae for this experiment")
-    feedback = models.ManyToManyField(
-        Feedback, help_text="Select a feedback for this experiment")
-
-    def display_stimulae(self):
-        """
-        Creates a string for the Stimulae. This is required to display stimulae in Admin.
-        """
-        return ', '.join([stimulae.name
-                          for stimulae in self.stimulae.all()[: 3]])
-
-    def display_feedback(self):
-        """
-        Creates a string for the Feedback. This is required to display feedback in Admin.
-        """
-        return ', '.join([feedback.name
-                          for feedback in self.feedback.all()[: 3]])
-
-    class Meta:
-        ordering = ['title']
-
-    def get_absolute_url(self):
-        """
-        Returns the url to access a particular record.
-        """
-        return reverse('experiment-detail', args=[str(self.id)])
-
-    def __str__(self):
-        """
-        String for representing the Model object.
-        """
-        return self.title
-
-
 class Subject(models.Model):
     """
     Model representing test subgect.
@@ -179,3 +131,52 @@ class Record(models.Model):
         String for representing the Model object.
         """
         return '%s (%s)' % (self.id, self.experiment.title)
+
+
+class Experiment(models.Model):
+    """
+    Model representing a experiment (but not a specific record).
+    """
+    title = models.CharField(max_length=200)
+    summary = models.TextField(
+        max_length=1000,
+        help_text="Enter a brief description of the experiment")
+    DateTime = models.DateTimeField(null=True, blank=True)
+    subjects = models.ManyToManyField(Subject)
+    stimulae = models.OneToOneField(
+        Stimulae, on_delete=models.PROTECT,
+        help_text="Select a stimulae for this experiment")
+    feedback = models.OneToOneField(
+        Feedback, on_delete=models.PROTECT,
+        help_text="Select a feedback for this experiment")
+    records = models.ManyToManyField(
+        Record, blank=True, help_text="Select a records for this experiment")
+
+    def display_stimulae(self):
+        """
+        Creates a string for the Stimulae. This is required to display stimulae in Admin.
+        """
+        return ', '.join([stimulae.name
+                          for stimulae in self.stimulae.all()[: 3]])
+
+    def display_feedback(self):
+        """
+        Creates a string for the Feedback. This is required to display feedback in Admin.
+        """
+        return ', '.join([feedback.name
+                          for feedback in self.feedback.all()[: 3]])
+
+    class Meta:
+        ordering = ['title']
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular record.
+        """
+        return reverse('experiment-detail', args=[str(self.id)])
+
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        return self.title

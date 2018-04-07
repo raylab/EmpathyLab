@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lablog.models import Subject, Feedback, Stimulae, Record
+from lablog.models import Subject, Feedback, Stimulae, Record, Experiment
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from datetime import datetime, timezone
@@ -179,3 +179,60 @@ class RecordModelTest(TestCase):
         sut = Record.objects.get(id=1)
         self.assertEquals(sut.ObservationMedia1, 'SomeMedia1')
         self.assertEquals(sut.ObservationMedia2, 'SomeMedia2')
+
+
+class ExperimentModelTest(TestCase):
+
+    @classmethod
+    def save_side_effect(*args, **kwargs):
+        return str(args[2])
+
+    @classmethod
+    @mock.patch('django.core.files.storage.default_storage._wrapped')
+    def setUpTestData(cls, storage_mock):
+        storage_mock.save = mock.Mock(side_effect=cls.save_side_effect)
+        media1 = SimpleUploadedFile(
+            name='test_video_file.mov',
+            content=b'mov content',
+            content_type='video/mp4')
+
+        fantasy = Stimulae.objects.create(
+            name='Fantasy',
+            media1=media1,
+        )
+        some_feedback = Feedback.objects.create(
+            electrode1=1,
+            electrode2=2,
+            electrode3=3,
+            electrode4=4,
+            analysis='AnalysisText')
+        sut = Experiment.objects.create(
+            title='SomeTitle',
+            summary='SomeSummary',
+            DateTime=datetime(2002, 12, 25, tzinfo=timezone.utc),
+            stimulae=fantasy,
+            feedback=some_feedback,
+        )
+
+    def test_has_description(self):
+        sut = Experiment.objects.get(id=1)
+        self.assertEquals(sut.title, 'SomeTitle')
+        self.assertEquals(sut.summary, 'SomeSummary')
+
+    def test_has_datetime(self):
+        sut = Experiment.objects.get(id=1)
+        self.assertEquals(
+            datetime(
+                2002,
+                12,
+                25,
+                tzinfo=timezone.utc),
+            sut.DateTime)
+
+    def test_has_stimulae_assotiated(self):
+        sut = Experiment.objects.get(id=1)
+        self.assertEquals(sut.stimulae.name, 'Fantasy')
+
+    def test_has_feedback_assotiated(self):
+        sut = Experiment.objects.get(id=1)
+        self.assertEquals(sut.feedback.analysis, 'AnalysisText')
