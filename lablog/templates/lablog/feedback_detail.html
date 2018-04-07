@@ -1,10 +1,11 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Experiment: {{record.experiment.title}}</h1>
-    <p>Subject: {{record.subject}}</p>
-    <p>Attendant: {{record.attendant}}</p>
-    <p{% if record.is_overdue %} class="text-danger"{% endif %}>Due date: {{record.due_back}}</p>
-    <p>{{record.experiment.summary}}</p>
+    <h1>Feedback: {{feedback.id}}</h1>
+    <p>Electrode 1: {{feedback.electrode1}}</p>
+    <p>Electrode 2: {{feedback.electrode2}}</p>
+    <p>Electrode 3: {{feedback.electrode3}}</p>
+    <p>Electrode 4: {{feedback.electrode4}}</p>
+    <p>Analysis: {{feedback.analysis}}</p>
 {% endblock %}
 
