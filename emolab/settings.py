@@ -37,6 +37,8 @@ ALLOWED_HOSTS = ['.herokuapp.com', '127.0.0.1', "*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'lablog',  # This object was created for us in /lablogs/apps.py
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +46,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'lablog.apps.LablogConfig',  # This object was created for us in /lablogs/apps.py
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,14 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+ASGI_APPLICATION = 'emolab.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}
