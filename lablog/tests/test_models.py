@@ -206,7 +206,7 @@ class ExperimentModelTest(TestCase):
             electrode3=3,
             electrode4=4,
             analysis='AnalysisText')
-        sut = Experiment.objects.create(
+        Experiment.objects.create(
             title='SomeTitle',
             summary='SomeSummary',
             DateTime=datetime(2002, 12, 25, tzinfo=timezone.utc),

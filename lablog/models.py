@@ -120,18 +120,6 @@ class Record(models.Model):
     class Meta:
         permissions = (("can_change_status", "Set record status"),)
 
-    def get_absolute_url(self):
-        """
-        Returns the url to access a particular subject instance.
-        """
-        return reverse('record-detail', args=[str(self.id)])
-
-    def __str__(self):
-        """
-        String for representing the Model object.
-        """
-        return '%s (%s)' % (self.id, self.experiment.title)
-
 
 class Experiment(models.Model):
     """
@@ -151,20 +139,6 @@ class Experiment(models.Model):
         help_text="Select a feedback for this experiment")
     records = models.ManyToManyField(
         Record, blank=True, help_text="Select a records for this experiment")
-
-    def display_stimulae(self):
-        """
-        Creates a string for the Stimulae. This is required to display stimulae in Admin.
-        """
-        return ', '.join([stimulae.name
-                          for stimulae in self.stimulae.all()[: 3]])
-
-    def display_feedback(self):
-        """
-        Creates a string for the Feedback. This is required to display feedback in Admin.
-        """
-        return ', '.join([feedback.name
-                          for feedback in self.feedback.all()[: 3]])
 
     class Meta:
         ordering = ['title']

@@ -3,10 +3,8 @@ from django.test import TestCase
 # Create your tests here.
 
 
-from lablog.models import Subject, Record, Experiment, Stimulae, Feedback
+from lablog.models import Subject
 from django.urls import reverse
-from django.utils import timezone
-from datetime import timedelta, date
 
 from django.contrib.auth.models import User, Permission
 
@@ -81,7 +79,7 @@ class SubjectCreateViewTest(TestCase):
             reverse('subject_create'))
 
     def test_redirect_if_logged_in_but_not_correct_permission(self):
-        login = self.client.login(username='testuser1', password='DAU12345')
+        self.client.login(username='testuser1', password='DAU12345')
         resp = self.client.get(reverse('subject_create'))
         self.assertRedirects(
             resp,
@@ -89,28 +87,28 @@ class SubjectCreateViewTest(TestCase):
             reverse('subject_create'))
 
     def test_logged_in_with_permission(self):
-        login = self.client.login(username='testuser2', password='DAU12345')
+        self.client.login(username='testuser2', password='DAU12345')
         resp = self.client.get(reverse('subject_create'))
         self.assertEqual(resp.status_code, 200)
 
     def test_uses_correct_template(self):
-        login = self.client.login(username='testuser2', password='DAU12345')
+        self.client.login(username='testuser2', password='DAU12345')
         resp = self.client.get(reverse('subject_create'))
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'lablog/subject_form.html')
 
     def test_form_gender_initially_set_to_expected_date(self):
-        login = self.client.login(username='testuser2', password='DAU12345')
+        self.client.login(username='testuser2', password='DAU12345')
         resp = self.client.get(reverse('subject_create'))
         self.assertEqual(resp.status_code, 200)
 
-        expected_initial_date = date(2016, 12, 10)
+        # expected_initial_date = date(2016, 12, 10)
         # response_date=resp.context['form'].initial['gender']
-        #response_date=datetime.datetime.strptime(response_date, "%m/%d/%Y").date()
-        #self.assertEqual(response_date, expected_initial_date )
+        # response_date=datetime.datetime.strptime(response_date, "%m/%d/%Y").date()
+        # self.assertEqual(response_date, expected_initial_date )
 
     def test_redirects_to_detail_view_on_success(self):
-        login = self.client.login(username='testuser2', password='DAU12345')
+        self.client.login(username='testuser2', password='DAU12345')
         resp = self.client.post(
             reverse('subject_create'), {
                 'first_name': 'Christian Name', 'last_name': 'Surname', })
@@ -142,7 +140,7 @@ class FeedbackCreateViewTest(TestCase):
             reverse('feedback_create'))
 
     def test_redirect_if_logged_in_but_not_correct_permission(self):
-        login = self.client.login(username='unprivileged', password='DAU12345')
+        self.client.login(username='unprivileged', password='DAU12345')
         resp = self.client.get(reverse('feedback_create'))
         self.assertRedirects(
             resp,
@@ -150,13 +148,13 @@ class FeedbackCreateViewTest(TestCase):
             reverse('feedback_create'))
 
     def test_logged_in_with_permission(self):
-        login = self.client.login(username='scientist', password='DAU12345')
+        self.client.login(username='scientist', password='DAU12345')
         resp = self.client.get(reverse('feedback_create'))
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'lablog/feedback_form.html')
 
     def test_redirects_to_detail_view_on_success(self):
-        login = self.client.login(username='scientist', password='DAU12345')
+        self.client.login(username='scientist', password='DAU12345')
         form_data = {
             'electrode1': '1',
             'electrode2': '2',
@@ -190,7 +188,7 @@ class StimulaeCreateViewTest(TestCase):
             reverse('stimulae_create'))
 
     def test_redirect_if_logged_in_but_not_correct_permission(self):
-        login = self.client.login(username='unprivileged', password='DAU12345')
+        self.client.login(username='unprivileged', password='DAU12345')
         resp = self.client.get(reverse('stimulae_create'))
         self.assertRedirects(
             resp,
@@ -198,13 +196,13 @@ class StimulaeCreateViewTest(TestCase):
             reverse('stimulae_create'))
 
     def test_logged_in_with_permission(self):
-        login = self.client.login(username='scientist', password='DAU12345')
+        self.client.login(username='scientist', password='DAU12345')
         resp = self.client.get(reverse('stimulae_create'))
         self.assertEqual(resp.status_code, 200)
         self.assertTemplateUsed(resp, 'lablog/stimulae_form.html')
 
     def test_redirects_to_detail_view_on_success(self):
-        login = self.client.login(username='scientist', password='DAU12345')
+        self.client.login(username='scientist', password='DAU12345')
         form_data = {
             'name': 'test_stimulae',
             'media1': 'somefile.mov',

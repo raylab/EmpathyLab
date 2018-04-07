@@ -47,14 +47,18 @@ Installation and running on developer's machine
     ```sh
     ./manage.py migrate
     ```
-1. Run `redis` using for example `docker`:
+1. Collect static files:
     ```sh
-    docker pull redis
-    docker run --rm -p127.0.0.1:6379:6379 --name some-redis -d redis
+    ./manage.py collectstatic
     ```
 1. Create superuser:
     ```sh
     ./manage.py createsuperuser
+    ```
+1. Run `redis` using for example `docker`:
+    ```sh
+    docker pull redis
+    docker run --rm -p127.0.0.1:6379:6379 --name some-redis -d redis
     ```
 1. Run application:
     ```sh

@@ -1,10 +1,8 @@
-dj-database-url==0.4.1
-Django==2.0
-gunicorn==19.6.0
-psycopg2==2.6.2
-wheel==0.24.0
-whitenoise==3.2.2
-channels==1.1.8
-asgi_redis==1.4.3
+asgi-redis==1.4.3
+channels==2.0.2
+dj-database-url==0.5.0
+Django==2.0.4
 django-extensions==2.0.6
-plyvel==1.0.4
+gunicorn==19.7.1
+psycopg2==2.7.4
+whitenoise==3.3.1

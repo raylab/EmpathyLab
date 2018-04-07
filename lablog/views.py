@@ -1,15 +1,7 @@
 from django.shortcuts import render
-
-#import pdb; pdb.set_trace()
-
 from .models import Experiment, Subject, Record, Stimulae, Feedback
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import generic
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.contrib.auth.decorators import permission_required
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 
@@ -188,7 +180,6 @@ class RecordCreate(PermissionRequiredMixin, CreateView):
 
 class RecordUpdate(PermissionRequiredMixin, UpdateView):
     model = Record
-    #fields = ['first_name','last_name','date_of_birth','gender']
     permission_required = 'lablog.can_change_status'
 
 
