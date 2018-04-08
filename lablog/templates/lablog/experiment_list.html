@@ -1,25 +1,45 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-    <h1>Experiments List</h1>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Experiments List</h1>
+</div>
 
-    {% if experiment_list %}
-    <ul>
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Title</th>
+				<th>DateTime</th>
+				<th>Subjects</th>
+				<th>Stimulae</th>
+				<th>Feedback</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for experiment in experiment_list %}
+			<tr>
+				<td>{{ experiment.id }}</td>
+				<td>{{ experiment.title }}</td>
+				<td>{{ experiment.DateTime }}</td>
+				<td>
+					{% for subject in experiment.subjects.all %}{{ subject.first_name}}{{subject.last_name }}, {% endfor %}
+				</td>
+				<td>{{ experiment.stimulae.name }}</td>
+				<td>{{ experiment.feedback.analysis }}</td>
+				<td>
+					<a href="{% url 'experiment-detail' pk=experiment.id %}">View</a>,
+					<a href="{% url 'experiment_update' pk=experiment.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'experiment_delete' pk=experiment.id %}">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
 
-      {% for experiment in experiment_list %}
-      <li>
-        <a href="{{ experiment.get_absolute_url }}">{{ experiment.title }}</a> ({{experiment.summary}})
-      </li>
-      {% endfor %}
-
-    </ul>
-
-    {% else %}
-      <p>There are no experiments yet.</p>
-    {% endif %}  
-
-     <form>
-    <input type="button" value="Create new experiment" onclick="window.location.href='{% url 'experiment_create'%}'" />
-    </form>      
+<a class="btn btn-primary" href="{% url 'experiment_create' %}" role="button">Register new experiment</a>
 {% endblock %}
 

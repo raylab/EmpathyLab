@@ -128,6 +128,7 @@ class FeedbackCreate(PermissionRequiredMixin, CreateView):
 
 class FeedbackUpdate(PermissionRequiredMixin, UpdateView):
     model = Feedback
+    fields = '__all__'
     permission_required = 'lablog.can_change_status'
 
 
@@ -145,12 +146,13 @@ class StimulaeCreate(PermissionRequiredMixin, CreateView):
 
 class StimulaeUpdate(PermissionRequiredMixin, UpdateView):
     model = Stimulae
+    fields = '__all__'
     permission_required = 'lablog.can_change_status'
 
 
 class StimulaeDelete(PermissionRequiredMixin, DeleteView):
     model = Stimulae
-    success_url = reverse_lazy('stimulae')
+    success_url = reverse_lazy('stimulaes')
     permission_required = 'lablog.can_change_status'
 
 
@@ -162,7 +164,7 @@ class SubjectCreate(PermissionRequiredMixin, CreateView):
 
 class SubjectUpdate(PermissionRequiredMixin, UpdateView):
     model = Subject
-    fields = ['first_name', 'last_name', 'date_of_birth', 'gender']
+    fields = '__all__'
     permission_required = 'lablog.can_change_status'
 
 
@@ -180,6 +182,7 @@ class RecordCreate(PermissionRequiredMixin, CreateView):
 
 class RecordUpdate(PermissionRequiredMixin, UpdateView):
     model = Record
+    fields = '__all__'
     permission_required = 'lablog.can_change_status'
 
 

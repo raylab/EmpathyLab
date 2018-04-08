@@ -1,82 +1,89 @@
 <!DOCTYPE html>
+
+{% load static %}
+
 <html lang="en">
-<head>
-  
-  {% block title %}<title>Empathy Lab</title>{% endblock %}
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!--<link rel="stylesheet" href="/static/css/style.css" type="text/css" media="screen" />-->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script src="/static/js/jquery-3.1.0.min.js" type="text/javascript"></script>
-  
-  <!-- Add additional CSS in static file -->
-  {% load static %}
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		{% block title %}<title>Empathy Lab</title>{% endblock %}
+		<!-- Bootstrap core CSS -->
+		<link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+		<!-- Custom styles for this project -->
+		<link href="{% static 'css/styles.css' %}" rel="stylesheet">
+	</head>
+	<body>
+		<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+			<a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{% url 'index' %}">Empathy Lab</a>
+			<ul class="navbar-nav px-3">
+				<li class="nav-item text-nowrap">
+					{% if user.is_authenticated %}
+					<a href="{% url 'logout' %}?next={{request.path}}" class="nav-link">Sign out</a>
+					{% else %}
+					<a href="{% url 'login' %}?next={{request.path}}" class="nav-link">Sign in</a>
+					{% endif %}
+				</li>
+			</ul>
+		</nav>
 
-<div class="container-fluid">
+		<div class="container-fluid">
+			<div class="row">
+				<nav class="col-md-2 d-none d-md-block bg-light sidebar">
+					<div class="sidebar-sticky">
+						<ul class="nav flex-column">
+							<li class="nav-item">
+								<a class="nav-link {% if request.resolver_match.view_name == "index" %}active{% endif %}" href="{% url 'index' %}">
+									<span data-feather="home"></span>
+									Home
+								</a>
+							</li>
 
-<div class="row">
-  <div class="col-sm-2">
-  {% block sidebar %}
-  <ul class="sidebar-nav">
-    <li><a href="{% url 'index' %}">Home</a></li>
-    <li><a href="{% url 'experiments' %}">All Experiments</a></li>
-    <li><a href="{% url 'subjects' %}">All subjects</a></li>
-    <li><a href="{% url 'stimulaes' %}">All stimulaes</a></li>
-    <li><a href="{% url 'feedbacks' %}">All feedbacks</a></li>
-    <li><a href="{% url 'records' %}">All records</a></li>
-  </ul>
- 
-  <ul class="sidebar-nav">
-   {% if user.is_authenticated %}
-     <li>User: {{ user.get_username }}</li>
-     <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
-   {% else %}
-     <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
-   {% endif %} 
-  </ul>
-  
-   {% if user.is_staff %}
-   <hr />
-   <ul class="sidebar-nav">
-   <li>Staff</li>
-   {% if perms.lablog.can_mark_returned %}
-   <li><a href="{% url 'all-records' %}">All records</a></li>
-   {% endif %}
-   </ul>
-    {% endif %}
- 
-{% endblock %}
-  </div>
-  <div class="col-sm-10 ">
-  {% block content %}{% endblock %}
-  
-  {% block pagination %}
-    {% if is_paginated %}
-        <div class="pagination">
-            <span class="page-links">
-                {% if page_obj.has_previous %}
-                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
-                {% endif %}
-                <span class="page-current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                </span>
-                {% if page_obj.has_next %}
-                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-                {% endif %}
-            </span>
-        </div>
-    {% endif %}
-  {% endblock %} 
-  
-  
-  </div>
-</div>
+							<li class="nav-item">
+								<a class="nav-link {% if request.resolver_match.view_name == "experiments" %}active{% endif %}" href="{% url 'experiments' %}">
+									<span data-feather="activity"></span>
+									Experiments
+								</a>
+							</li>
 
-</div>
-</body>
+							<li class="nav-item">
+								<a class="nav-link {% if request.resolver_match.view_name == "subjects" %}active{% endif %}" href="{% url 'subjects' %}">
+									<span data-feather="users"></span>
+									Subjects
+								</a>
+							</li>
+
+							<li class="nav-item">
+								<a class="nav-link {% if request.resolver_match.view_name == "stimulaes" %}active{% endif %}" href="{% url 'stimulaes' %}">
+									<span data-feather="video"></span>
+									Stimulaes
+								</a>
+							</li>
+
+							<li class="nav-item">
+								<a class="nav-link {% if request.resolver_match.view_name == "feedbacks" %}active{% endif %}" href="{% url 'feedbacks' %}">
+									<span data-feather="sliders"></span>
+									Feedbacks
+								</a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+
+				<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+				{% block content %}{% endblock %}
+				</main>
+
+			</div>
+		</div>
+		<!-- bootstrap -->
+		<script src="{% static 'js/jquery-3.3.1.min.js' %}"</script>
+		<script src="{% static 'js/popper.min.js' %}"></script>
+		<script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+		<!-- Icons -->
+		<script src="{% static 'js/feather.min.js' %}"></script>
+		<script>
+			feather.replace()
+		</script>
+	</body>
 </html>

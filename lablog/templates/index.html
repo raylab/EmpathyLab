@@ -1,7 +1,9 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<h1>Empathy Lab Home</h1>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Empathy Lab Home</h1>
+</div>
 
 <p>Welcome to <em>Empathy Lab</em>, a very basic Django website developed as a Lab Jornal and Log site.
 <p>This is Django skeleton website and application, define URL mappings, views (including Generic List and Detail Views), models and templates.</p>
@@ -11,15 +13,14 @@
 <p>An UML diagram of the site's Django model structure is shown below. </p>
 
 <h2>Dynamic content</h2>
-
 <p>The EmoLab shell has the following record counts:</p>
+
 <ul>
 <li><strong>Experiments:</strong> {{ num_experiments }}</li>
 <li><strong>Records:</strong> {{ num_records }}</li>
 <li><strong>Records available:</strong> {{ num_records_available }}</li>
 <li><strong>Subjects:</strong> {{ num_subjects }}</li>
 </ul>
-
 
 You have visited this page {{ num_visits }} times.
 

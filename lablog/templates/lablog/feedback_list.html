@@ -1,19 +1,42 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<h1>All Feedbacks</h1>
-  {% if feedback_list %}
-    <ul>
-    {% for feedback in feedback_list %}
-      <li>
-        <a href="{{ feedback.get_absolute_url }}">{{ feedback }}</a>
-      </li>
-    {% endfor %}
-    </ul>
-  {% else %}
-    <p>There are no feedback arrangements.</p>
-  {% endif %}       
-<form>
-    <input type="button" value="Create new feedback" onclick="window.location.href='{% url 'feedback_create'%}'" />
-</form>   
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Feedbacks List</h1>
+</div>
+
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Analysis</th>
+				<th>Electrode 1</th>
+				<th>Electrode 2</th>
+				<th>Electrode 3</th>
+				<th>Electrode 4</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for feedback in feedback_list %}
+			<tr>
+				<td>{{ feedback.id }}</td>
+				<td>{{ feedback.analysis }}</td>
+				<td>{{ feedback.electrode1 }}</td>
+				<td>{{ feedback.electrode2 }}</td>
+				<td>{{ feedback.electrode3 }}</td>
+				<td>{{ feedback.electrode4 }}</td>
+				<td>
+					<a href="{% url 'feedback-detail' pk=feedback.id %}">View</a>,
+					<a href="{% url 'feedback_update' pk=feedback.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'feedback_delete' pk=feedback.id %}">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+<a class="btn btn-primary" href="{% url 'feedback_create' %}" role="button">Register new feedback</a>
 {% endblock %}
