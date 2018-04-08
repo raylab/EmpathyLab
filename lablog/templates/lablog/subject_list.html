@@ -1,26 +1,41 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Subjects List</h1>
+</div>
 
-<h1>Subjects List</h1>
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+				<th>Date of Birth</th>
+				<th>Gender</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for subject in subject_list %}
+			<tr>
+				<td>{{ subject.id }}</td>
+				<td>{{ subject.first_name }}</td>
+				<td>{{ subject.last_name }}</td>
+				<td>{{ subject.date_of_birth }}</td>
+				<td>{{ subject.gender }}</td>
+				<td>
+					<a href="{% url 'subject-detail' pk=subject.id %}">View</a>,
+					<a href="{% url 'subject_update' pk=subject.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'subject_delete' pk=subject.id %}">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
 
-{% if subject_list %}
-  <ul>
-
-  {% for subject in subject_list %}
-    <li>
-      <a href="{{ subject.get_absolute_url }}">{{ subject }} ({{subject.date_of_birth}}, {{subject.gender}})</a>
-    </li>
-  {% endfor %}
-
- </ul>
-{% else %}
-  <p>There are no subjects available.</p>
-{% endif %}
-        
-    <form>
-    <input type="button" value="Register new subject" onclick="window.location.href='{% url 'subject_create'%}'" />
-    </form>   
-        
+<a class="btn btn-primary" href="{% url 'subject_create' %}" role="button">Register new subject</a>
 {% endblock %}
 
