@@ -1,2 +1,1 @@
-web: gunicorn emolab.wsgi --log-file -
-
+web: daphne emolab.asgi:application

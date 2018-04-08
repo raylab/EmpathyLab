@@ -14,3 +14,9 @@ class SensorsConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         print(text_data)
+
+    def sensors_start_recording(self, event):
+        print('SensorsConsumer.start_recording', event)
+
+    def sensors_stop_recording(self, event):
+        print('SensorsConsumer.stop_recording', event)
