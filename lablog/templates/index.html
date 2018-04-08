@@ -1,5 +1,7 @@
 {% extends "base_generic.html" %}
 
+{% load static %}
+
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
 	<h1 class="h2">Empathy Lab Home</h1>
@@ -16,12 +18,19 @@
 <p>The EmoLab shell has the following record counts:</p>
 
 <ul>
-<li><strong>Experiments:</strong> {{ num_experiments }}</li>
-<li><strong>Records:</strong> {{ num_records }}</li>
-<li><strong>Records available:</strong> {{ num_records_available }}</li>
-<li><strong>Subjects:</strong> {{ num_subjects }}</li>
+	<li><strong>Experiments:</strong> {{ num_experiments }}</li>
+	<li><strong>Records:</strong> {{ num_records }}</li>
+	<li><strong>Records available:</strong> {{ num_records_available }}</li>
+	<li><strong>Subjects:</strong> {{ num_subjects }}</li>
 </ul>
 
-You have visited this page {{ num_visits }} times.
+<p> You have visited this page {{ num_visits }} times. </p>
 
+<div class="card">
+  <div class="card-header">
+    Connected headsets
+  </div>
+  <ul class="list-group list-group-flush headsets-list">
+  </ul>
+</div>
 {% endblock %}
