@@ -1,129 +1,143 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-<script>
-function openPage(pageName, elmnt, color) {
-    // Hide all elements with class="tabcontent" by default */
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-
-    // Remove the background color of all tablinks/buttons
-    tablinks = document.getElementsByClassName("tablink");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].style.backgroundColor = "";
-    }
-
-    // Show the specific tab content
-    document.getElementById(pageName).style.display = "block";
-
-    // Add the specific color to the button used to open the tab content
-    elmnt.style.backgroundColor = color;
-}
-
-// Get the element with id="defaultOpen" and click on it
-document.getElementById("defaultOpen").click(); 
-</script>
-
-<h1>Title: {{ experiment.title }}</h1>
-<div style="margin-left:20px;margin-top:20px">
-<p><strong>Summary:</strong> {{ experiment.summary }}</p>
-<p><strong>ISBN:</strong> {{ experiment.isbn }}</p> 
-
-<div class="tab">
-  <button class="tablink" onclick="openPage('Feedback', this, 'DarkCyan')" id="defaultOpen">Feedback</button>
-  <button class="tablink" onclick="openPage('Stimulae', this, 'DarkCyan')">Stimulae</button>
-  <button class="tablink" onclick="openPage('Subjects', this, 'DarkCyan')">Subjects</button>
-  <button class="tablink" onclick="openPage('Records', this, 'DarkCyan')">Records</button>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Experiment: {{experiment.title}}</h1>
+	{% if experiment.DateTime %}
+	<small class="text-muted">{{experiment.DateTime}}</small>
+	{% endif %}
+	<div class="btn-toolbar mb-2 mb-md-0">
+		<div class="btn-group mr-2">
+			<a href="{% url 'experiment_update' pk=experiment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+			<a href="{% url 'experiment_delete' pk=experiment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+		</div>
+	</div>
+</div>
+<p class="lead">
+{{experiment.summary}}
+</p>
+<h2>Records</h2>
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Start Time</th>
+				<th>Stop Time</th>
+				<th>Observation Media 1</th>
+				<th>Observation Media 2</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for record in experiment.records.all %}
+			<tr>
+				<td>{{ record.id }}</td>
+				<td>{{ record.start_time }}</td>
+				<td>{{ record.stop_time }}</td>
+				<td>{{ record.ObservationMedia1 }}</td>
+				<td>{{ record.ObservationMedia2 }}</td>
+				<td>
+					<a href="{% url 'record-detail' pk=record.id %}">View</a>,
+					<a href="{% url 'record_update' pk=record.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'record_delete' pk=record.id %}">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
 
-<div id="Feedback" class="tabcontent">
-<p><h4>Feedback:</h4> </p> 
-<hr>
-<table>
- <tr>
-<th>
-{% for feedback in experiment.feedback.all %}{{ feedback }}{% if not forloop.last %}, {% endif %}{% endfor %}</p> 
-</th>
-<th>
-<form>
-    <input type="button" value="Add new feedback" onclick="window.location.href='{% url 'feedback_create'%}'" />
-    </form>  
-</th>
-</tr>
-</table>
+<h2>Subjects</h2>
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>First Name</th>
+				<th>Last Name</th>
+				<th>Date of Birth</th>
+				<th>Gender</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for subject in experiment.subjects.all %}
+			<tr>
+				<td>{{ subject.id }}</td>
+				<td>{{ subject.first_name }}</td>
+				<td>{{ subject.last_name }}</td>
+				<td>{{ subject.date_of_birth }}</td>
+				<td>{{ subject.gender }}</td>
+				<td>
+					<a href="{% url 'subject-detail' pk=subject.id %}">View</a>,
+					<a href="{% url 'subject_update' pk=subject.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'subject_delete' pk=subject.id %}">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
 
-<div id="Stimulae" class="tabcontent">
-<p><h4>Stimulae:</h4> 
-<hr>
-<table>
- <tr>
-<th>
-{% for stimulae in experiment.stimulae.all %}{{stimulae}}{% if not forloop.last %}, {% endif %}{% endfor %}</p>  
-</th>
-<th>
-<form>
-    <input type="button" value="Add new stimulae" onclick="window.location.href='{% url 'stimulae_create'%}'" />
-    </form>  
-</th>
-</tr>
-</table>
+<h2>Stimulae</h2>
+<div class="table-responsive table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Name</th>
+				<th>Media 1</th>
+				<th>Media 2</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ experiment.stimulae.id }}</td>
+				<td>{{ experiment.stimulae.name }}</td>
+				<td>{{ experiment.stimulae.media1 }}</td>
+				<td>{{ experiment.stimulae.media2 }}</td>
+				<td>
+					<a href="{% url 'stimulae-detail' pk=experiment.stimulae.id %}">View</a>,
+					<a href="{% url 'stimulae_update' pk=experiment.stimulae.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'stimulae_delete' pk=experiment.stimulae.id %}">Delete</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </div>
 
-<div id="Subjects" class="tabcontent">
-<h4>Subjects</h4>
-<hr>
-<table>
- <tr>
-<th>
-<ul>
-{% for subject in experiment.subjects.all %}
-  <li>
-    <a href="{% url 'subject-detail' subject.pk %}">{{ subject }}, {{ subject.date_of_birth }}, {{ subject.gender }}</a></p> 
-  </li>
-{% endfor %}
-</ul>
-</th>
-<th>
-<form>
-    <input type="button" value="Register new subject" onclick="window.location.href='{% url 'subject_create'%}'" />
-</form>
-</th>
-</tr>
-</table>   
-<hr>
-</div>
-
-<div id="Records" class="tabcontent">
-<h4>Records</h4>
-<hr>
-<table>
-
-{% for record in experiment.record_set.all %}
-  <tr>
-    <th>
-       <p class="{% if record.status == 'a' %}text-success{% elif record.status == 'd' %}text-danger{% else %}text-warning{% endif %}">{{ record.get_status_display }}</p>
-{% if record.status != 'a' %}{% endif %}
-<p><strong>Imprint:</strong> {{record.imprint}}</p>
-<a href="{{ record.get_absolute_url }}">{{ record }}</a>
-</th>
-</tr>
-{% endfor %}
- <tr>
-    <th>
-<form>
-    <input type="button" value="Create new record" onclick="window.location.href='{% url 'record_create'%}'" />
-  </form> 
-</th>
-</tr>
-</table>
-</div>
-
-
-
+<h2>Feedback</h2>
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Analysis</th>
+				<th>Electrode 1</th>
+				<th>Electrode 2</th>
+				<th>Electrode 3</th>
+				<th>Electrode 4</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ experiment.feedback.id }}</td>
+				<td>{{ experiment.feedback.analysis }}</td>
+				<td>{{ experiment.feedback.electrode1 }}</td>
+				<td>{{ experiment.feedback.electrode2 }}</td>
+				<td>{{ experiment.feedback.electrode3 }}</td>
+				<td>{{ experiment.feedback.electrode4 }}</td>
+				<td>
+					<a href="{% url 'feedback-detail' pk=experiment.feedback.id %}">View</a>,
+					<a href="{% url 'feedback_update' pk=experiment.feedback.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'feedback_delete' pk=experiment.feedback.id %}">Delete</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </div>
 {% endblock %}
 

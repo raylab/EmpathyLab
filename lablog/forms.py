@@ -3,113 +3,29 @@ from django.utils.translation import ugettext_lazy as _
 import datetime  # for checking renewal date range.
 
 from django import forms
+from .models import Experiment
+from django.forms.widgets import TextInput, Textarea, DateTimeInput, SelectMultiple, Select
 
 
-class NewExperimentForm(forms.Form):
+class ExperimentForm(forms.ModelForm):
     """
-    Form for a librarian to renew books.
+    Form for a editing experiment.
     """
-    renewal_date = forms.DateField(
-        help_text="Enter a date between now and 4 weeks (default 3).")
 
-    def clean_renewal_date(self):
-        data = self.cleaned_data['renewal_date']
-
-        # Check date is not in past.
-        if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
-        # Check date is in range librarian allowed to change (+4 weeks)
-        if data > datetime.date.today() + datetime.timedelta(weeks=4):
-            raise ValidationError(
-                _('Invalid date - renewal more than 4 weeks ahead'))
-
-        # Remember to always return the cleaned data.
-        return data
-
-
-class NewSubjectForm(forms.Form):
-    """
-    Form for a librarian to renew books.
-    """
-    renewal_date = forms.DateField(
-        help_text="Enter a date between now and 4 weeks (default 3).")
-
-    def clean_renewal_date(self):
-        data = self.cleaned_data['renewal_date']
-
-        # Check date is not in past.
-        if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
-        # Check date is in range librarian allowed to change (+4 weeks)
-        if data > datetime.date.today() + datetime.timedelta(weeks=4):
-            raise ValidationError(
-                _('Invalid date - renewal more than 4 weeks ahead'))
-
-        # Remember to always return the cleaned data.
-        return data
-
-
-class NewRecordForm(forms.Form):
-    """
-    Form for a librarian to renew books.
-    """
-    renewal_date = forms.DateField(
-        help_text="Enter a date between now and 4 weeks (default 3).")
-
-    def clean_renewal_date(self):
-        data = self.cleaned_data['renewal_date']
-
-        # Check date is not in past.
-        if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
-        # Check date is in range librarian allowed to change (+4 weeks)
-        if data > datetime.date.today() + datetime.timedelta(weeks=4):
-            raise ValidationError(
-                _('Invalid date - renewal more than 4 weeks ahead'))
-
-        # Remember to always return the cleaned data.
-        return data
-
-
-class NewStimulaeForm(forms.Form):
-    """
-    Form for a librarian to renew books.
-    """
-    renewal_date = forms.DateField(
-        help_text="Enter a date between now and 4 weeks (default 3).")
-
-    def clean_renewal_date(self):
-        data = self.cleaned_data['renewal_date']
-
-        # Check date is not in past.
-        if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
-        # Check date is in range librarian allowed to change (+4 weeks)
-        if data > datetime.date.today() + datetime.timedelta(weeks=4):
-            raise ValidationError(
-                _('Invalid date - renewal more than 4 weeks ahead'))
-
-        # Remember to always return the cleaned data.
-        return data
-
-
-class NewFeedbackForm(forms.Form):
-    """
-    Form for a librarian to renew books.
-    """
-    renewal_date = forms.DateField(
-        help_text="Enter a date between now and 4 weeks (default 3).")
-
-    def clean_renewal_date(self):
-        data = self.cleaned_data['renewal_date']
-
-        # Check date is not in past.
-        if data < datetime.date.today():
-            raise ValidationError(_('Invalid date - renewal in past'))
-        # Check date is in range librarian allowed to change (+4 weeks)
-        if data > datetime.date.today() + datetime.timedelta(weeks=4):
-            raise ValidationError(
-                _('Invalid date - renewal more than 4 weeks ahead'))
-
-        # Remember to always return the cleaned data.
-        return data
+    class Meta(object):
+        model = Experiment
+        fields = [
+            'title',
+            'summary',
+            'DateTime',
+            'subjects',
+            'stimulae',
+            'feedback']
+        widgets = {
+            'title': TextInput(attrs={'class': 'form-control'}),
+            'summary': Textarea(attrs={'class': 'form-control'}),
+            'DateTime': DateTimeInput(attrs={'class': 'form-control'}),
+            'subjects': SelectMultiple(attrs={'class': 'form-control'}),
+            'stimulae': Select(attrs={'class': 'form-control'}),
+            'feedback': Select(attrs={'class': 'form-control'}),
+        }

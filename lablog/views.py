@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from .forms import ExperimentForm
 
 
 def index(request):
@@ -194,14 +195,14 @@ class RecordtDelete(PermissionRequiredMixin, DeleteView):
 
 # Classes created for the forms challenge
 class ExperimentCreate(PermissionRequiredMixin, CreateView):
+    form_class = ExperimentForm
     model = Experiment
-    fields = '__all__'
     permission_required = 'lablog.can_change_status'
 
 
 class ExperimentUpdate(PermissionRequiredMixin, UpdateView):
+    form_class = ExperimentForm
     model = Experiment
-    fields = '__all__'
     permission_required = 'lablog.can_change_status'
 
 
