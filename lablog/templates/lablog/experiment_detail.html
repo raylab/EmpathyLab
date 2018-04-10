@@ -29,17 +29,16 @@
         <th>Action</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody class="js-records-table" data-experiment="{{ experiment.id }}">
       {% for record in experiment.records.all %}
-      <tr>
+      <tr data-record="{{ record.id }}">
         <td>{{ record.id }}</td>
-        <td>{{ record.start_time }}</td>
-        <td>{{ record.stop_time }}</td>
+        <td>{{ record.StartTime }}</td>
+        <td>{{ record.StopTime }}</td>
         <td>{{ record.ObservationMedia1 }}</td>
         <td>{{ record.ObservationMedia2 }}</td>
         <td>
           <a href="{% url 'record-detail' pk=record.id %}">View</a>,
-          <a href="{% url 'record_update' pk=record.id %}">Edit</a>,
           <a class="text-danger" href="{% url 'record_delete' pk=record.id %}">Delete</a>
         </td>
       </tr>

@@ -1,5 +1,8 @@
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
+from django.template import defaultfilters
 from asgiref.sync import async_to_sync
+from lablog.models import Record, Experiment
+from datetime import datetime, timezone
 
 
 class SensorsConsumer(WebsocketConsumer):
@@ -38,15 +41,32 @@ class SensorsConsumer(WebsocketConsumer):
             },
         )
 
+    def receive(self, text_data):
+        if self.is_recorded:
+            # Wow. Worst way ever.
+            self.record_obj.EEG += text_data
+            self.record_obj.save()
+
     def sensors_start_recording(self, event):
         if not self.is_recorded:
+            self.experiment = Experiment.objects.get(id=event["experiment"])
+            self.record_obj = Record.objects.create(
+                StartTime=datetime.now(tz=timezone.utc))
+            self.record_obj.save()
+            self.experiment.records.add(self.record_obj)
+            self.record = self.record_obj.id
             self.is_recorded = True
-            self.record = 2
             self.sensors_update()
+            self.sensors_add_record(self.experiment, self.record_obj)
 
     def sensors_stop_recording(self, event):
         if self.is_recorded:
             self.is_recorded = False
+            self.record_obj.StopTime = datetime.now(tz=timezone.utc)
+            self.record_obj.save()
+            self.sensors_update_record(self.experiment, self.record_obj)
+            self.record_obj = None
+            self.experiment = None
             self.record = 0
             self.sensors_update()
 
@@ -60,6 +80,31 @@ class SensorsConsumer(WebsocketConsumer):
                 "record": self.record,
             },
         )
+
+    def sensors_add_record(self, experiment, record):
+        async_to_sync(
+            self.channel_layer.group_send)(
+            "webui",
+            {"type": "webui.add_record", "channel": self.channel_name,
+             "experiment": experiment.id, "record_id": record.id,
+             "record_StartTime": defaultfilters.date(
+                 record.StartTime, "DATETIME_FORMAT"),
+             "record_StopTime": "",
+             "record_ObservationMedia1": record.ObservationMedia1,
+             "record_ObservationMedia2": record.ObservationMedia2, },)
+
+    def sensors_update_record(self, experiment, record):
+        async_to_sync(
+            self.channel_layer.group_send)(
+            "webui",
+            {"type": "webui.update_record", "channel": self.channel_name,
+             "experiment": experiment.id, "record_id": record.id,
+             "record_StartTime": defaultfilters.date(
+                 record.StartTime, "DATETIME_FORMAT"),
+             "record_StopTime": defaultfilters.date(
+                 record.StopTime, "DATETIME_FORMAT"),
+             "record_ObservationMedia1": record.ObservationMedia1,
+             "record_ObservationMedia2": record.ObservationMedia2, },)
 
     def sensors_ping(self, event):
         async_to_sync(self.channel_layer.send)(
@@ -139,4 +184,30 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             'sensor': event["channel"],
             'is_recorded': event["is_recorded"],
             'record': event["record"],
+        })
+
+    def webui_add_record(self, event):
+        self.send_json({
+            'command': 'add_record',
+            'experiment': event["experiment"],
+            'record': {
+                'id': event["record_id"],
+                'StartTime': event["record_StartTime"],
+                'StopTime': event["record_StopTime"],
+                'ObservationMedia1': event['record_ObservationMedia1'],
+                'ObservationMedia2': event['record_ObservationMedia2']
+            }
+        })
+
+    def webui_update_record(self, event):
+        self.send_json({
+            'command': 'update_record',
+            'experiment': event["experiment"],
+            'record': {
+                'id': event["record_id"],
+                'StartTime': event["record_StartTime"],
+                'StopTime': event["record_StopTime"],
+                'ObservationMedia1': event['record_ObservationMedia1'],
+                'ObservationMedia2': event['record_ObservationMedia2']
+            }
         })

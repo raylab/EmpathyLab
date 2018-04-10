@@ -187,9 +187,9 @@ class RecordUpdate(PermissionRequiredMixin, UpdateView):
     permission_required = 'lablog.can_change_status'
 
 
-class RecordtDelete(PermissionRequiredMixin, DeleteView):
+class RecordDelete(PermissionRequiredMixin, DeleteView):
     model = Record
-    success_url = reverse_lazy('records')
+    success_url = reverse_lazy('index')
     permission_required = 'lablog.can_change_status'
 
 

@@ -120,6 +120,12 @@ class Record(models.Model):
     class Meta:
         permissions = (("can_change_status", "Set record status"),)
 
+    def __str__(self):
+        """
+        String for representing the Model object.
+        """
+        return "record " + str(self.id)
+
 
 class Experiment(models.Model):
     """
