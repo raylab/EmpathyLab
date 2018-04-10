@@ -2,150 +2,150 @@
 
 {% block content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-	<h1 class="h2">Experiment: {{experiment.title}}</h1>
-	{% if experiment.DateTime %}
-	<small class="text-muted">{{experiment.DateTime}}</small>
-	{% endif %}
-	<div class="btn-toolbar mb-2 mb-md-0">
-		<div class="btn-group mr-2">
-			<a href="{% url 'experiment_update' pk=experiment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-			<a href="{% url 'experiment_delete' pk=experiment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
-		</div>
-	</div>
+  <h1 class="h2">Experiment: {{experiment.title}}</h1>
+  {% if experiment.DateTime %}
+  <small class="text-muted">{{experiment.DateTime}}</small>
+  {% endif %}
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+      <a href="{% url 'experiment_update' pk=experiment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'experiment_delete' pk=experiment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </div>
 </div>
 <p class="lead">
 {{experiment.summary}}
 </p>
 <h2>Records</h2>
 <div class="table-responsive table-striped table-hover">
-	<table class="table table-striped table-sm">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>Start Time</th>
-				<th>Stop Time</th>
-				<th>Observation Media 1</th>
-				<th>Observation Media 2</th>
-				<th>Action</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for record in experiment.records.all %}
-			<tr>
-				<td>{{ record.id }}</td>
-				<td>{{ record.start_time }}</td>
-				<td>{{ record.stop_time }}</td>
-				<td>{{ record.ObservationMedia1 }}</td>
-				<td>{{ record.ObservationMedia2 }}</td>
-				<td>
-					<a href="{% url 'record-detail' pk=record.id %}">View</a>,
-					<a href="{% url 'record_update' pk=record.id %}">Edit</a>,
-					<a class="text-danger" href="{% url 'record_delete' pk=record.id %}">Delete</a>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Start Time</th>
+        <th>Stop Time</th>
+        <th>Observation Media 1</th>
+        <th>Observation Media 2</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in experiment.records.all %}
+      <tr>
+        <td>{{ record.id }}</td>
+        <td>{{ record.start_time }}</td>
+        <td>{{ record.stop_time }}</td>
+        <td>{{ record.ObservationMedia1 }}</td>
+        <td>{{ record.ObservationMedia2 }}</td>
+        <td>
+          <a href="{% url 'record-detail' pk=record.id %}">View</a>,
+          <a href="{% url 'record_update' pk=record.id %}">Edit</a>,
+          <a class="text-danger" href="{% url 'record_delete' pk=record.id %}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <div class="card">
   <div class="card-header">
     Connected headsets
   </div>
-  <ul class="list-group list-group-flush headsets-list">
+  <ul class="list-group list-group-flush headsets-list" data-experiment="{{ experiment.id }}">
   </ul>
 </div>
 
 <h2>Subjects</h2>
 <div class="table-responsive table-striped table-hover">
-	<table class="table table-striped table-sm">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>First Name</th>
-				<th>Last Name</th>
-				<th>Date of Birth</th>
-				<th>Gender</th>
-				<th>Action</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for subject in experiment.subjects.all %}
-			<tr>
-				<td>{{ subject.id }}</td>
-				<td>{{ subject.first_name }}</td>
-				<td>{{ subject.last_name }}</td>
-				<td>{{ subject.date_of_birth }}</td>
-				<td>{{ subject.gender }}</td>
-				<td>
-					<a href="{% url 'subject-detail' pk=subject.id %}">View</a>,
-					<a href="{% url 'subject_update' pk=subject.id %}">Edit</a>,
-					<a class="text-danger" href="{% url 'subject_delete' pk=subject.id %}">Delete</a>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Date of Birth</th>
+        <th>Gender</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for subject in experiment.subjects.all %}
+      <tr>
+        <td>{{ subject.id }}</td>
+        <td>{{ subject.first_name }}</td>
+        <td>{{ subject.last_name }}</td>
+        <td>{{ subject.date_of_birth }}</td>
+        <td>{{ subject.gender }}</td>
+        <td>
+          <a href="{% url 'subject-detail' pk=subject.id %}">View</a>,
+          <a href="{% url 'subject_update' pk=subject.id %}">Edit</a>,
+          <a class="text-danger" href="{% url 'subject_delete' pk=subject.id %}">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
 <h2>Stimulae</h2>
 <div class="table-responsive table-hover">
-	<table class="table table-striped table-sm">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>Name</th>
-				<th>Media 1</th>
-				<th>Media 2</th>
-				<th>Action</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>{{ experiment.stimulae.id }}</td>
-				<td>{{ experiment.stimulae.name }}</td>
-				<td>{{ experiment.stimulae.media1 }}</td>
-				<td>{{ experiment.stimulae.media2 }}</td>
-				<td>
-					<a href="{% url 'stimulae-detail' pk=experiment.stimulae.id %}">View</a>,
-					<a href="{% url 'stimulae_update' pk=experiment.stimulae.id %}">Edit</a>,
-					<a class="text-danger" href="{% url 'stimulae_delete' pk=experiment.stimulae.id %}">Delete</a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Media 1</th>
+        <th>Media 2</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ experiment.stimulae.id }}</td>
+        <td>{{ experiment.stimulae.name }}</td>
+        <td>{{ experiment.stimulae.media1 }}</td>
+        <td>{{ experiment.stimulae.media2 }}</td>
+        <td>
+          <a href="{% url 'stimulae-detail' pk=experiment.stimulae.id %}">View</a>,
+          <a href="{% url 'stimulae_update' pk=experiment.stimulae.id %}">Edit</a>,
+          <a class="text-danger" href="{% url 'stimulae_delete' pk=experiment.stimulae.id %}">Delete</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <h2>Feedback</h2>
 <div class="table-responsive table-striped table-hover">
-	<table class="table table-striped table-sm">
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>Analysis</th>
-				<th>Electrode 1</th>
-				<th>Electrode 2</th>
-				<th>Electrode 3</th>
-				<th>Electrode 4</th>
-				<th>Action</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>{{ experiment.feedback.id }}</td>
-				<td>{{ experiment.feedback.analysis }}</td>
-				<td>{{ experiment.feedback.electrode1 }}</td>
-				<td>{{ experiment.feedback.electrode2 }}</td>
-				<td>{{ experiment.feedback.electrode3 }}</td>
-				<td>{{ experiment.feedback.electrode4 }}</td>
-				<td>
-					<a href="{% url 'feedback-detail' pk=experiment.feedback.id %}">View</a>,
-					<a href="{% url 'feedback_update' pk=experiment.feedback.id %}">Edit</a>,
-					<a class="text-danger" href="{% url 'feedback_delete' pk=experiment.feedback.id %}">Delete</a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Analysis</th>
+        <th>Electrode 1</th>
+        <th>Electrode 2</th>
+        <th>Electrode 3</th>
+        <th>Electrode 4</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ experiment.feedback.id }}</td>
+        <td>{{ experiment.feedback.analysis }}</td>
+        <td>{{ experiment.feedback.electrode1 }}</td>
+        <td>{{ experiment.feedback.electrode2 }}</td>
+        <td>{{ experiment.feedback.electrode3 }}</td>
+        <td>{{ experiment.feedback.electrode4 }}</td>
+        <td>
+          <a href="{% url 'feedback-detail' pk=experiment.feedback.id %}">View</a>,
+          <a href="{% url 'feedback_update' pk=experiment.feedback.id %}">Edit</a>,
+          <a class="text-danger" href="{% url 'feedback_delete' pk=experiment.feedback.id %}">Delete</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 {% endblock %}
 

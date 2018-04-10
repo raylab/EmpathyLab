@@ -8,6 +8,8 @@ class SensorsConsumer(WebsocketConsumer):
     """
 
     def connect(self):
+        self.is_recorded = False
+        self.record = 0
         async_to_sync(
             self.channel_layer.group_add)(
             "sensors",
@@ -18,6 +20,8 @@ class SensorsConsumer(WebsocketConsumer):
             {
                 "type": "webui.add_sensor",
                 "channel": self.channel_name,
+                "is_recorded": self.is_recorded,
+                "record": self.record,
             },
         )
 
@@ -34,14 +38,28 @@ class SensorsConsumer(WebsocketConsumer):
             },
         )
 
-    def receive(self, text_data):
-        print(text_data)
-
     def sensors_start_recording(self, event):
-        print('SensorsConsumer.start_recording', event)
+        if not self.is_recorded:
+            self.is_recorded = True
+            self.record = 2
+            self.sensors_update()
 
     def sensors_stop_recording(self, event):
-        print('SensorsConsumer.stop_recording', event)
+        if self.is_recorded:
+            self.is_recorded = False
+            self.record = 0
+            self.sensors_update()
+
+    def sensors_update(self):
+        async_to_sync(self.channel_layer.group_send)(
+            "webui",
+            {
+                "type": "webui.update_sensor",
+                "channel": self.channel_name,
+                "is_recorded": self.is_recorded,
+                "record": self.record,
+            },
+        )
 
     def sensors_ping(self, event):
         async_to_sync(self.channel_layer.send)(
@@ -49,6 +67,8 @@ class SensorsConsumer(WebsocketConsumer):
             {
                 "type": "webui.add_sensor",
                 "channel": self.channel_name,
+                "is_recorded": self.is_recorded,
+                "record": self.record,
             },
         )
 
@@ -75,13 +95,13 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             "webui", self.channel_name)
 
     def receive_json(self, content):
-        print(content)
         if content['command'] == 'start_recording':
             async_to_sync(self.channel_layer.send)(
                 content["channel"],
                 {
                     "type": "sensors.start_recording",
                     "channel": self.channel_name,
+                    "experiment": content["experiment"],
                 },
             )
         elif content['command'] == 'stop_recording':
@@ -90,6 +110,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
                 {
                     "type": "sensors.stop_recording",
                     "channel": self.channel_name,
+                    "record": content["record"],
                 },
             )
         else:
@@ -101,11 +122,21 @@ class WebAPIConsumer(JsonWebsocketConsumer):
     def webui_add_sensor(self, event):
         self.send_json({
             'command': 'add_sensor',
-            'sensor': event["channel"]
+            'sensor': event["channel"],
+            'is_recorded': event["is_recorded"],
+            'record': event["record"],
         })
 
     def webui_remove_sensor(self, event):
         self.send_json({
             'command': 'remove_sensor',
             'sensor': event["channel"]
+        })
+
+    def webui_update_sensor(self, event):
+        self.send_json({
+            'command': 'update_sensor',
+            'sensor': event["channel"],
+            'is_recorded': event["is_recorded"],
+            'record': event["record"],
         })
