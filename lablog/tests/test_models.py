@@ -236,3 +236,25 @@ class ExperimentModelTest(TestCase):
     def test_has_feedback_assotiated(self):
         sut = Experiment.objects.get(id=1)
         self.assertEquals(sut.feedback.analysis, 'AnalysisText')
+
+    def test_can_create_experiment_with_same_stimulus_and_feedback(self):
+        same_stimulus = Stimulae.objects.get(id=1)
+        same_feedback = Feedback.objects.get(id=1)
+        sut = Experiment.objects.create(
+            title='AnotherTitle',
+            summary='AnotherSummary',
+            DateTime=datetime(2002, 12, 25, tzinfo=timezone.utc),
+            stimulae=same_stimulus,
+            feedback=same_feedback,
+        )
+        self.assertEquals(sut.title, 'AnotherTitle')
+        self.assertEquals(sut.summary, 'AnotherSummary')
+        self.assertEquals(
+            datetime(
+                2002,
+                12,
+                25,
+                tzinfo=timezone.utc),
+            sut.DateTime)
+        self.assertEquals(sut.stimulae.id, same_stimulus.id)
+        self.assertEquals(sut.feedback.id, same_feedback.id)
