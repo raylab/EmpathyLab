@@ -131,10 +131,10 @@ class Experiment(models.Model):
         help_text="Enter a brief description of the experiment")
     DateTime = models.DateTimeField(null=True, blank=True)
     subjects = models.ManyToManyField(Subject)
-    stimulae = models.OneToOneField(
+    stimulae = models.ForeignKey(
         Stimulae, on_delete=models.PROTECT,
         help_text="Select a stimulae for this experiment")
-    feedback = models.OneToOneField(
+    feedback = models.ForeignKey(
         Feedback, on_delete=models.PROTECT,
         help_text="Select a feedback for this experiment")
     records = models.ManyToManyField(
