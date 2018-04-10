@@ -19,8 +19,8 @@ urlpatterns = [
 
     path('records/', views.RecordListView.as_view(), name='records'),
     path('records/', views.RecordsAllListView.as_view(), name='all-records'),
-    path('record/<uuid:pk>', views.RecordDetailView.as_view(), name='record-detail'),
-    path('record/create/', views.RecordCreate.as_view(), name='record_create'),
+    path('record/<int:pk>', views.RecordDetailView.as_view(), name='record-detail'),
+    path('record/<int:pk>/delete/', views.RecordDelete.as_view(), name='record_delete'),
 
     path('stimulaes/', views.StimulaeListView.as_view(), name='stimulaes'),
     path('stimulae/<int:pk>', views.StimulaeDetailView.as_view(), name='stimulae-detail'),

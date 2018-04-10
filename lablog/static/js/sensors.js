@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function() {
       for (var i = 0; i < sensor_items.length; i++) {
         sensor_items[i].parentNode.removeChild(sensor_items[i]);
       }
-    } else {
+    } else if(command == 'update_sensor') {
       var sensor = data['sensor']
       var is_recorded = data['is_recorded']
       var record = data['record']
@@ -68,6 +68,38 @@ document.addEventListener("DOMContentLoaded", function() {
         record_buttons[i].setAttribute("data-active", is_recorded);
         record_buttons[i].setAttribute("data-record", record);
         record_buttons[i].textContent = is_recorded  ? "Stop" : "Record";
+      }
+    } else if (command == 'add_record') {
+      var experiment = data['experiment']
+      var record = data['record']
+      var records_lists = document.querySelectorAll(".js-records-table[data-experiment=\"" + experiment + "\"]");
+      for (var i = 0; i < records_lists.length; i++) {
+        var record_item = document.createElement("tr");
+        record_item.setAttribute("data-record", record.id);
+        record_item.innerHTML = "<td>" + record.id + "</td>" +
+          "<td>" + record.StartTime + "</td>" +
+          "<td>" + record.StopTime + "</td>" +
+          "<td>" + record.ObservationMedia1 + "</td>" +
+          "<td>" + record.ObservationMedia2 + "</td>" +
+          "<td>" + 
+            '<a href="/lablog/record/' + record.id + '">View</a>, ' +
+            '<a class="text-danger" href="/lablog/record/' + record.id + '/delete/">Delete</a>' + 
+          "</td>";
+        records_lists[i].appendChild(record_item);
+      }
+    } else if (command == 'update_record') {
+      var record = data['record']
+      var records = document.querySelectorAll("tr[data-record=\"" + record.id + "\"]");
+      for (var i = 0; i < records.length; i++) {
+        records[i].innerHTML = "<td>" + record.id + "</td>" +
+          "<td>" + record.StartTime + "</td>" +
+          "<td>" + record.StopTime + "</td>" +
+          "<td>" + record.ObservationMedia1 + "</td>" +
+          "<td>" + record.ObservationMedia2 + "</td>" +
+          "<td>" + 
+            '<a href="/lablog/record/' + record.id + '">View</a>, ' +
+            '<a class="text-danger" href="/lablog/record/' + record.id + '/delete/">Delete</a>' + 
+          "</td>";
       }
     }
   };
