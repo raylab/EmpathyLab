@@ -1,8 +1,5 @@
 from django.db import models
-
-# Create your models here.
-
-# Used to generate urls by reversing the URL patterns
+from django.conf import settings
 from django.urls import reverse
 
 
@@ -110,10 +107,11 @@ class Record(models.Model):
     Model representing a specific record.
     """
 
-    EEG = models.TextField(blank=True)
+    EEG = models.FilePathField(
+        path=settings.EEGDATA_STORE_PATH,
+        match=".*\.db$")
     StartTime = models.DateTimeField(null=True, blank=True)
     StopTime = models.DateTimeField(null=True, blank=True)
-    TENSControl = models.TextField(blank=True)
     ObservationMedia1 = models.CharField(max_length=200, blank=True)
     ObservationMedia2 = models.CharField(max_length=200, blank=True)
 

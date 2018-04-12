@@ -149,7 +149,6 @@ class RecordModelTest(TestCase):
             EEG='SomeEEG',
             StartTime=datetime(2002, 12, 25, tzinfo=timezone.utc),
             StopTime=datetime(2002, 12, 26, tzinfo=timezone.utc),
-            TENSControl='SomeTENS',
             ObservationMedia1='SomeMedia1',
             ObservationMedia2='SomeMedia2',
         )
