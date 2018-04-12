@@ -1,11 +1,13 @@
-from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
 from django.template import defaultfilters
 from asgiref.sync import async_to_sync
 from lablog.models import Record, Experiment
 from datetime import datetime, timezone
+from lablog import eeg
+from django.conf import settings
 
 
-class SensorsConsumer(WebsocketConsumer):
+class SensorsConsumer(JsonWebsocketConsumer):
     """
     Receives data from headsets
     """
@@ -41,31 +43,31 @@ class SensorsConsumer(WebsocketConsumer):
             },
         )
 
-    def receive(self, text_data):
+    def receive_json(self, content):
         if self.is_recorded:
-            # Wow. Worst way ever.
-            self.record_obj.EEG += text_data
-            self.record_obj.save()
+            self.eeg.append_json(content)
 
     def sensors_start_recording(self, event):
         if not self.is_recorded:
             self.experiment = Experiment.objects.get(id=event["experiment"])
-            self.record_obj = Record.objects.create(
-                StartTime=datetime.now(tz=timezone.utc))
-            self.record_obj.save()
-            self.experiment.records.add(self.record_obj)
-            self.record = self.record_obj.id
+            self.eeg = eeg.Data(settings.EEGDATA_STORE_PATH)
+            record_obj = Record.objects.create(
+                StartTime=datetime.now(tz=timezone.utc), EEG=self.eeg.filename)
+            record_obj.save()
+            self.experiment.records.add(record_obj)
+            self.record = record_obj.id
             self.is_recorded = True
             self.sensors_update()
-            self.sensors_add_record(self.experiment, self.record_obj)
+            self.sensors_add_record(self.experiment, record_obj)
 
     def sensors_stop_recording(self, event):
         if self.is_recorded:
             self.is_recorded = False
-            self.record_obj.StopTime = datetime.now(tz=timezone.utc)
-            self.record_obj.save()
-            self.sensors_update_record(self.experiment, self.record_obj)
-            self.record_obj = None
+            record_obj = Record.objects.get(pk=self.record)
+            record_obj.StopTime = datetime.now(tz=timezone.utc)
+            record_obj.save()
+            self.sensors_update_record(self.experiment, record_obj)
+            self.eeg = None
             self.experiment = None
             self.record = 0
             self.sensors_update()

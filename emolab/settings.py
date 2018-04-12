@@ -157,3 +157,5 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+EEGDATA_STORE_PATH = os.path.join(BASE_DIR, 'eeg/')
