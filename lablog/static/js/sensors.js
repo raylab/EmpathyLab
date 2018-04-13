@@ -1,110 +1,213 @@
-document.addEventListener("DOMContentLoaded", function() {
+'use strict'
 
-  function recordClicked() {
-    var is_recorded = this.getAttribute("data-active");
-    var sensor = this.getAttribute("data-channel");
-    if (is_recorded == 'true') {
-      var record = this.getAttribute("data-record");
-      webapi.send(JSON.stringify(
-        {
-          command: "stop_recording",
-          channel: sensor,
-          record: record,
-        }));
-    } else {
-      var experiment = this.getAttribute("data-experiment");
-      webapi.send(JSON.stringify(
-        {
-          command: "start_recording",
-          channel: sensor,
-          experiment: experiment,
-        }));
-    }
+const RecordButton = {
+  create (isRecording) {
+    const btn = document.createElement('button')
+    this.set(btn, isRecording)
+    return btn
+  },
+  set (btn, isRecording) {
+    btn.className = 'js-record-button btn btn-sm ' +
+      (isRecording ? 'btn-danger' : 'btn-secondary')
+    btn.textContent = isRecording ? 'Stop' : 'Record'
+    btn.setAttribute('data-active', isRecording)
+  },
+  getAll (container = document.body) {
+    return container.querySelectorAll('.js-record-button')
   }
+}
 
-  var webapi = new WebSocket('ws://' + window.location.host + '/ws/api');
-
-  webapi.onmessage = function(e) {
-    var data = JSON.parse(e.data);
-    var command = data['command'];
-    if(command == 'add_sensor') {
-      var sensor = data['sensor']
-      var is_recorded = data['is_recorded']
-      var record = data['record']
-      var headsets_lists = document.querySelectorAll(".headsets-list");
-      for (var i = 0; i < headsets_lists.length; i++) {
-        var sensor_item = document.createElement("li");
-        sensor_item.className = "list-group-item d-flex justify-content-between align-items-center";
-        sensor_item.setAttribute("data-channel", sensor);
-        sensor_item.appendChild(document.createTextNode(sensor));
-        var experiment = headsets_lists[i].getAttribute("data-experiment");
-        if (experiment) {
-          var record_button = document.createElement("button");
-          record_button.className = "btn btn-sm " + (is_recorded  ? "btn-danger": "btn-secondary");
-          record_button.setAttribute("data-channel", sensor);
-          record_button.setAttribute("data-record", record);
-          record_button.setAttribute("data-active", is_recorded);
-          record_button.setAttribute("data-experiment", experiment);
-          record_button.textContent = is_recorded ? "Stop" : "Record";
-          record_button.addEventListener('click', recordClicked, false);
-          sensor_item.appendChild(record_button);
+const Headset = {
+  create (sensor, record, isRecording, showRecordButton) {
+    const item = document.createElement('li')
+    item.className = 'js-headset-item list-group-item d-flex justify-content-between align-items-center'
+    item.setAttribute('data-channel', sensor)
+    item.setAttribute('data-record', record)
+    item.appendChild(document.createTextNode(sensor))
+    if (showRecordButton) {
+      const btn = RecordButton.create(isRecording)
+      btn.addEventListener('click', function () {
+        if (btn.getAttribute('data-active') === 'true') {
+          WebAPI.stopRecording(sensor, item.getAttribute('data-record'))
+        } else {
+          item.dispatchEvent(new CustomEvent('startRecording'))
         }
-        headsets_lists[i].appendChild(sensor_item);
-      }
-    } 
-    else if(command == 'remove_sensor') {
-      var sensor = data['sensor'];
-      var sensor_items = document.querySelectorAll("li[data-channel=\""+ sensor +"\"]");
-      for (var i = 0; i < sensor_items.length; i++) {
-        sensor_items[i].parentNode.removeChild(sensor_items[i]);
-      }
-    } else if(command == 'update_sensor') {
-      var sensor = data['sensor']
-      var is_recorded = data['is_recorded']
-      var record = data['record']
-      var record_buttons = document.querySelectorAll("button[data-channel=\""+ sensor +"\"]");
-      for (var i = 0; i < record_buttons.length; i++) {
-        record_buttons[i].className = "btn btn-sm " + (is_recorded ? "btn-danger": "btn-secondary");
-        record_buttons[i].setAttribute("data-active", is_recorded);
-        record_buttons[i].setAttribute("data-record", record);
-        record_buttons[i].textContent = is_recorded  ? "Stop" : "Record";
-      }
-    } else if (command == 'add_record') {
-      var experiment = data['experiment']
-      var record = data['record']
-      var records_lists = document.querySelectorAll(".js-records-table[data-experiment=\"" + experiment + "\"]");
-      for (var i = 0; i < records_lists.length; i++) {
-        var record_item = document.createElement("tr");
-        record_item.setAttribute("data-record", record.id);
-        record_item.innerHTML = "<td>" + record.id + "</td>" +
-          "<td>" + record.StartTime + "</td>" +
-          "<td>" + record.StopTime + "</td>" +
-          "<td>" + record.ObservationMedia1 + "</td>" +
-          "<td>" + record.ObservationMedia2 + "</td>" +
-          "<td>" + 
-            '<a href="/lablog/record/' + record.id + '">View</a>, ' +
-            '<a class="text-danger" href="/lablog/record/' + record.id + '/delete/">Delete</a>' + 
-          "</td>";
-        records_lists[i].appendChild(record_item);
-      }
-    } else if (command == 'update_record') {
-      var record = data['record']
-      var records = document.querySelectorAll("tr[data-record=\"" + record.id + "\"]");
-      for (var i = 0; i < records.length; i++) {
-        records[i].innerHTML = "<td>" + record.id + "</td>" +
-          "<td>" + record.StartTime + "</td>" +
-          "<td>" + record.StopTime + "</td>" +
-          "<td>" + record.ObservationMedia1 + "</td>" +
-          "<td>" + record.ObservationMedia2 + "</td>" +
-          "<td>" + 
-            '<a href="/lablog/record/' + record.id + '">View</a>, ' +
-            '<a class="text-danger" href="/lablog/record/' + record.id + '/delete/">Delete</a>' + 
-          "</td>";
+      })
+      item.appendChild(btn)
+    }
+    return item
+  },
+
+  set (item, record, isRecording) {
+    item.setAttribute('data-record', record)
+    const btns = RecordButton.getAll(item)
+    for (let i = 0; i < btns.length; i++) {
+      RecordButton.set(btns[i], isRecording)
+    }
+  },
+
+  getAll (container = document.body) {
+    return container.querySelectorAll('.js-headset-item')
+  },
+
+  getBySensorAll (container = document.body, sensor) {
+    return container.querySelectorAll('.js-headset-item[data-channel="' + sensor + '"]')
+  }
+}
+
+const HeadsetList = {
+  addHeadset (list, sensor, record, isRecording) {
+    const showRecordButton = list.hasAttribute('data-allow-recording')
+    const item = Headset.create(sensor, record, isRecording, showRecordButton)
+    item.addEventListener('startRecording', function (e) {
+      WebAPI.startRecording(sensor, list.getAttribute('data-experiment'))
+    })
+    list.appendChild(item)
+  },
+
+  removeHeadset (list, sensor) {
+    const items = Headset.getBySensorAll(list, sensor)
+    for (let i = 0; i < items.length; i++) {
+      items[i].parentNode.removeChild(items[i])
+    }
+  },
+
+  setHeadset (list, sensor, record, isRecording) {
+    const items = Headset.getBySensorAll(list, sensor)
+    for (let i = 0; i < items.length; i++) {
+      Headset.set(items[i], record, isRecording)
+    }
+  },
+
+  getAll (container = document.body) {
+    return container.querySelectorAll('.headsets-list')
+  }
+}
+
+const RecordItem = {
+  create (record) {
+    const item = document.createElement('tr')
+    item.setAttribute('data-record', record.id)
+    this.set(item, record)
+    return item
+  },
+
+  set (item, record) {
+    item.innerHTML = '<td>' + record.id + '</td>' +
+      '<td>' + record.StartTime + '</td>' +
+      '<td>' + record.StopTime + '</td>' +
+      '<td>' + record.ObservationMedia1 + '</td>' +
+      '<td>' + record.ObservationMedia2 + '</td>' +
+      '<td>' +
+      '<a href="/lablog/record/' + record.id + '">View</a>, ' +
+      '<a class="text-danger" href="/lablog/record/' + record.id + '/delete/">Delete</a>' +
+      '</td>'
+  },
+
+  getByRecordID (container = document.body, id) {
+    return container.querySelectorAll('tr[data-record="' + id + '"]')
+  }
+}
+
+const RecordList = {
+  addRecord (list, record) {
+    list.appendChild(RecordItem.create(record))
+  },
+  setRecord (list, record) {
+    const items = RecordItem.getByRecordID(list, record.id)
+    for (let i = 0; i < items.length; i++) {
+      RecordItem.set(items[i], record)
+    }
+  },
+  getByExperimentID (container = document.body, id) {
+    return container.querySelectorAll('.js-records-table[data-experiment="' + id + '"]')
+  },
+  getAll (container = document.body) {
+    return container.querySelectorAll('.js-records-table')
+  }
+}
+
+function onAddRecord (data) {
+  const lists = RecordList.getByExperimentID(document.body, data.experiment)
+  for (let i = 0; i < lists.length; i++) {
+    RecordList.addRecord(lists[i], data.record)
+  }
+}
+
+function onUpdateRecord (data) {
+  const lists = RecordList.getAll()
+  for (let i = 0; i < lists.length; i++) {
+    RecordList.setRecord(lists[i], data.record)
+  }
+}
+
+function onAddSensor (data) {
+  const lists = HeadsetList.getAll()
+  for (let i = 0; i < lists.length; i++) {
+    HeadsetList.addHeadset(lists[i], data.sensor, data.record, data.is_recorded)
+  }
+}
+
+function onRemoveSensor (data) {
+  const lists = HeadsetList.getAll()
+  for (let i = 0; i < lists.length; i++) {
+    HeadsetList.removeHeadset(lists[i], data.sensor)
+  }
+}
+
+function onUpdateSensor (data) {
+  const lists = HeadsetList.getAll()
+  for (let i = 0; i < lists.length; i++) {
+    HeadsetList.setHeadset(lists[i], data.sensor, data.record, data.is_recorded)
+  }
+}
+
+const WebAPI = {
+  init (host) {
+    this.socket = new WebSocket('ws://' + host + '/ws/api')
+    this.socket.onmessage = function (e) {
+      const data = JSON.parse(e.data)
+      switch (data.command) {
+        case 'add_sensor':
+          onAddSensor(data)
+          break
+        case 'remove_sensor':
+          onRemoveSensor(data)
+          break
+        case 'update_sensor':
+          onUpdateSensor(data)
+          break
+        case 'add_record':
+          onAddRecord(data)
+          break
+        case 'update_record':
+          onUpdateRecord(data)
+          break
       }
     }
-  };
 
-  webapi.onclose = function(e) {
-    console.error('WebAPI socket closed unexpectedly');
-  };
-});
+    this.socket.onclose = function (e) {
+      console.error('WebAPI socket closed unexpectedly')
+    }
+  },
+
+  startRecording (sensor, experiment) {
+    this.socket.send(JSON.stringify(
+      {
+        command: 'start_recording',
+        channel: sensor,
+        experiment: experiment
+      }))
+  },
+
+  stopRecording (sensor, record) {
+    this.socket.send(JSON.stringify(
+      {
+        command: 'stop_recording',
+        channel: sensor,
+        record: record
+      }))
+  }
+}
+
+WebAPI.init(window.location.host)
