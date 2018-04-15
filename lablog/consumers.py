@@ -44,6 +44,14 @@ class SensorsConsumer(JsonWebsocketConsumer):
         )
 
     def receive_json(self, content):
+        async_to_sync(self.channel_layer.group_send)(
+            "webui",
+            {
+                "type": "webui.raw_sensor",
+                "channel": self.channel_name,
+                "data": content
+            },
+        )
         if self.is_recorded:
             self.eeg.append_json(content)
 
@@ -212,4 +220,11 @@ class WebAPIConsumer(JsonWebsocketConsumer):
                 'ObservationMedia1': event['record_ObservationMedia1'],
                 'ObservationMedia2': event['record_ObservationMedia2']
             }
+        })
+
+    def webui_raw_sensor(self, event):
+        self.send_json({
+            'command': 'raw_sensor',
+            'sensor': event["channel"],
+            'data': event["data"]
         })
