@@ -23,12 +23,32 @@ function map(n, start1, stop1, start2, stop2) {
 const Chart = {
   queues: {},
   header: ['COUNTER', 'INTERPOLATED', 'RAW_CQ', 'AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4', 'GYROX', 'GYROY', 'TIMESTAMP', 'MARKER_HARDWARE', 'ES_TIMESTAMP', 'FUNC_ID', 'FUNC_VALUE', 'MARKER', 'SYNC_SIGNAL'],
+  emoNames: ['Stress', 'Engagement', 'Relaxation', 'Exitement', 'Interest'],
+  emoParams: ['Raw', 'Min', 'Max', 'Scaled'],
+  emostates: {},
   create(sensor) {
     const chart = document.createElement('canvas');
     chart.height = 540;
     chart.width = 600;
     chart.className = 'js-sensors-chart';
     this.queues[sensor] = [];
+    this.emostates[sensor] = {
+      Stress: {
+        Raw: 0, Min: 0, Max: 0, Scaled: 0,
+      },
+      Engagement: {
+        Raw: 0, Min: 0, Max: 0, Scaled: 0,
+      },
+      Relaxation: {
+        Raw: 0, Min: 0, Max: 0, Scaled: 0,
+      },
+      Exitement: {
+        Raw: 0, Min: 0, Max: 0, Scaled: 0,
+      },
+      Interest: {
+        Raw: 0, Min: 0, Max: 0, Scaled: 0,
+      },
+    };
     return chart;
   },
   drawDroppedPackets(chart, frames) {
@@ -43,7 +63,7 @@ const Chart = {
         if (i > 40 && tOld != ((tNew - 1) % 256)) {
           ctx.beginPath();
           ctx.moveTo(i, 20);
-          ctx.lineTo(i, chart.height);
+          ctx.lineTo(i, chart.height - 60);
           ctx.stroke();
         }
       }
@@ -85,14 +105,29 @@ const Chart = {
         if (i > 40 && Math.floor(tNew) !== Math.floor(tOld)) {
           ctx.beginPath();
           ctx.moveTo(i, 20);
-          ctx.lineTo(i, chart.height);
+          ctx.lineTo(i, chart.height - 60);
           ctx.stroke();
           ctx.fillText(Math.floor(tNew), i - 8, 16);
         }
       }
     }
   },
-  draw(chart, frames) {
+  drawEmostate(chart, emostate) {
+    const ctx = chart.getContext('2d');
+    ctx.strokeStyle = 'white';
+    ctx.fillStyle = 'white';
+    const emoNamesLength = this.emoNames.length;
+    const y = chart.height - 46;
+    for (let i = 0; i < emoNamesLength; i++) {
+      const x = map(i, 0, emoNamesLength, 5, chart.width - 5);
+      const emo = emostate[this.emoNames[i]];
+      ctx.fillText(`${this.emoNames[i]} Raw:${emo.Raw}`, x, y);
+      ctx.fillText(`${this.emoNames[i]} Min:${emo.Min}`, x, y + 14);
+      ctx.fillText(`${this.emoNames[i]} Max:${emo.Max}`, x, y + 28);
+      ctx.fillText(`${this.emoNames[i]} Scaled:${emo.Scaled}`, x, y + 42);
+    }
+  },
+  draw(chart, frames, emostate = null) {
     const ctx = chart.getContext('2d');
     if (chart.width !== chart.clientWidth || chart.height !== chart.clientHeight) {
       chart.width = chart.clientWidth;
@@ -103,6 +138,7 @@ const Chart = {
     this.drawTimeGrid(chart, frames);
     this.drawElectrodeData(chart, frames);
     this.drawDroppedPackets(chart, frames);
+    this.drawEmostate(chart, emostate);
   },
   getAll(container = document.body) {
     return container.querySelectorAll('.js-sensors-chart');
@@ -146,12 +182,17 @@ const Headset = {
     const charts = Chart.getAll(item);
     for (let i = 0; i < charts.length; i += 1) {
       const frames = Chart.queues[item.getAttribute('data-channel')];
+      let emostate = Chart.emostates[item.getAttribute('data-channel')];
       Array.prototype.push.apply(frames, data.frames);
       if (frames.length > charts[i].width) {
         frames.splice(0, frames.length - charts[i].width);
       }
+      if ('Emostate' in data) {
+        emostate = data.Emostate;
+        Chart.emostates[item.getAttribute('data-channel')] = emostate;
+      }
       window.requestAnimationFrame(() => {
-        Chart.draw(charts[i], frames);
+        Chart.draw(charts[i], frames, emostate);
       });
     }
   },
