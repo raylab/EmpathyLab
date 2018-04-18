@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from .models import Experiment, Subject, Record, Stimulae, Feedback
+from .models import Experiment, Subject, Record, Stimulae, Feedback, Analysis
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from .forms import ExperimentForm
+from .forms import ExperimentForm, AnalysisForm
 
 
 def index(request):
@@ -193,7 +193,6 @@ class RecordDelete(PermissionRequiredMixin, DeleteView):
     permission_required = 'lablog.can_change_status'
 
 
-# Classes created for the forms challenge
 class ExperimentCreate(PermissionRequiredMixin, CreateView):
     form_class = ExperimentForm
     model = Experiment
@@ -210,3 +209,26 @@ class ExperimentDelete(PermissionRequiredMixin, DeleteView):
     model = Experiment
     success_url = reverse_lazy('experiments')
     permission_required = 'lablog.can_change_status'
+
+
+class AnalysisListView(generic.ListView):
+    model = Analysis
+
+
+class AnalysisDetailView(generic.DetailView):
+    model = Analysis
+
+
+class AnalysisCreate(CreateView):
+    form_class = AnalysisForm
+    model = Analysis
+
+
+class AnalysisUpdate(UpdateView):
+    form_class = AnalysisForm
+    model = Analysis
+
+
+class AnalysisDelete(DeleteView):
+    model = Analysis
+    success_url = reverse_lazy('analyses')

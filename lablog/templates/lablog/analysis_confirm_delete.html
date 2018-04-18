@@ -1,0 +1,15 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Delete Analysis</h1>
+</div>
+
+<p>Are you sure you want to delete the analysis: {{ analysis }}?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" class="btn btn-danger" action="" value="Yes, delete." />
+</form>
+
+{% endblock %}

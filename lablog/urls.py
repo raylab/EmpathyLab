@@ -33,4 +33,10 @@ urlpatterns = [
     path('feedback/create/', views.FeedbackCreate.as_view(), name='feedback_create'),
     path('feedback/<int:pk>/update/', views.FeedbackUpdate.as_view(), name='feedback_update'),
     path('feedback/<int:pk>/delete/', views.FeedbackDelete.as_view(), name='feedback_delete'),
+
+    path('analyses/', views.AnalysisListView.as_view(), name='analyses'),
+    path('analysis/<int:pk>', views.AnalysisDetailView.as_view(), name='analysis-detail'),
+    path('analysis/create/', views.AnalysisCreate.as_view(), name='analysis_create'),
+    path('analysis/<int:pk>/update/', views.AnalysisUpdate.as_view(), name='analysis_update'),
+    path('analysis/<int:pk>/delete/', views.AnalysisDelete.as_view(), name='analysis_delete'),
 ]

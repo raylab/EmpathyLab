@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.urls import reverse
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Stimulae(models.Model):
@@ -62,6 +63,59 @@ class Feedback(models.Model):
         Returns the url to access a particular feedback instance.
         """
         return reverse('feedback-detail', args=[str(self.id)])
+
+
+class Analysis(models.Model):
+    """
+    Model representing an analysis setup.
+    """
+    name = models.CharField(
+        max_length=100,
+        default='default',
+        help_text='Name of analysis setup')
+
+    A = models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)])
+    B = models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)])
+    C = models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)])
+    D = models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)])
+    H = models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)])
+    L = models.IntegerField(
+        default=0,
+        validators=[
+            MaxValueValidator(100),
+            MinValueValidator(0)])
+
+    def __str__(self):
+        """
+        String for representing Analysis object.
+        """
+        return self.name
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular analysis instance.
+        """
+        return reverse('analysis-detail', args=[str(self.id)])
 
 
 class Subject(models.Model):
