@@ -34,37 +34,6 @@ class Stimulae(models.Model):
         return reverse('stimulae-detail', args=[str(self.id)])
 
 
-class Feedback(models.Model):
-    """
-    Model representing a feedback arrangement.
-    """
-    electrode1 = models.IntegerField(
-        default=1, help_text='Position of first electrode')
-    electrode2 = models.IntegerField(
-        default=1, help_text='Position of second electrode')
-    electrode3 = models.IntegerField(
-        default=1, help_text='Position of third electrode')
-    electrode4 = models.IntegerField(
-        default=1, help_text='Position of fourth electrode')
-    analysis = models.CharField(
-        max_length=100,
-        default='default',
-        help_text='Analysis setup')
-
-    def __str__(self):
-        """
-        String for representing Feedback object.
-        """
-        return 'Feedback {self.id} ({self.electrode1}, {self.electrode2}, {self.electrode3}, {self.electrode4}, \"{self.analysis}\")'.format(
-            self=self)
-
-    def get_absolute_url(self):
-        """
-        Returns the url to access a particular feedback instance.
-        """
-        return reverse('feedback-detail', args=[str(self.id)])
-
-
 class Analysis(models.Model):
     """
     Model representing an analysis setup.
@@ -116,6 +85,37 @@ class Analysis(models.Model):
         Returns the url to access a particular analysis instance.
         """
         return reverse('analysis-detail', args=[str(self.id)])
+
+
+class Feedback(models.Model):
+    """
+    Model representing a feedback arrangement.
+    """
+    electrode1 = models.IntegerField(
+        default=1, help_text='Position of first electrode')
+    electrode2 = models.IntegerField(
+        default=1, help_text='Position of second electrode')
+    electrode3 = models.IntegerField(
+        default=1, help_text='Position of third electrode')
+    electrode4 = models.IntegerField(
+        default=1, help_text='Position of fourth electrode')
+
+    analysis = models.ForeignKey(
+        Analysis, on_delete=models.PROTECT,
+        help_text="Select a analysis for this Feedback")
+
+    def __str__(self):
+        """
+        String for representing Feedback object.
+        """
+        return 'Feedback {self.id} ({self.electrode1}, {self.electrode2}, {self.electrode3}, {self.electrode4}, \"{self.analysis}\")'.format(
+            self=self)
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular feedback instance.
+        """
+        return reverse('feedback-detail', args=[str(self.id)])
 
 
 class Subject(models.Model):
