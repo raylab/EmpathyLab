@@ -3,6 +3,10 @@ from .models import Experiment, Analysis
 from django.forms.widgets import TextInput, Textarea, DateTimeInput, SelectMultiple, Select, NumberInput
 
 
+class RangeInput(NumberInput):
+    input_type = "range"
+
+
 class ExperimentForm(forms.ModelForm):
     """
     Form for a editing experiment.
@@ -33,10 +37,10 @@ class AnalysisForm(forms.ModelForm):
         fields = ['name', 'A', 'B', 'C', 'D', 'H', 'L']
         widgets = {
             'name': TextInput(attrs={'class': 'form-control'}),
-            'A': NumberInput(attrs={'class': 'form-control'}),
-            'B': NumberInput(attrs={'class': 'form-control'}),
-            'C': NumberInput(attrs={'class': 'form-control'}),
-            'D': NumberInput(attrs={'class': 'form-control'}),
-            'H': NumberInput(attrs={'class': 'form-control'}),
-            'L': NumberInput(attrs={'class': 'form-control'}),
+            'A': RangeInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
+            'B': RangeInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
+            'C': RangeInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
+            'D': RangeInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
+            'H': RangeInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
+            'L': RangeInput(attrs={'class': 'form-control', 'min': 0, 'max': 100}),
         }
