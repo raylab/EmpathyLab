@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+  {% if object %}
+  <h1 class="h2">Update Analysis</h1>
+  {% else %}
+  <h1 class="h2">Create Analysis</h1>
+  {% endif %}
+</div>
+
+<form action="" method="post">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+
+  {% for field in form %}
+  <div class="form-group">
+    {{ field.label_tag }}
+    {{ field }}
+    {{ field.errors }}
+    {% if field.help_text %}
+    <small id="{{field.id_for_label}}_help" class="form-text text-muted">{{ field.help_text|safe }}</small>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <input type="submit" class="btn btn-primary" value="Submit" />
+</form>
+{% endblock %}

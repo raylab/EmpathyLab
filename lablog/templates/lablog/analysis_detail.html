@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+  <h1 class="h2">Analysis: {{analysis.name}}</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group mr-2">
+      <a href="{% url 'analysis_update' pk=analysis.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'analysis_delete' pk=analysis.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </div>
+</div>
+<ul>
+	<li>A: {{analysis.A}}% </li>
+	<li>B: {{analysis.B}}% </li>
+	<li>C: {{analysis.C}}% </li>
+	<li>D: {{analysis.D}}% </li>
+	<li>H: {{analysis.H}}% </li>
+	<li>L: {{analysis.L}}% </li>
+</ul>
+{% endblock %}
+

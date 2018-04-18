@@ -65,6 +65,12 @@
 									Feedbacks
 								</a>
 							</li>
+							<li class="nav-item">
+								<a class="nav-link {% if request.resolver_match.view_name == "analyses" %}active{% endif %}" href="{% url 'analyses' %}">
+									<span data-feather="thermometer"></span>
+									Analyses
+								</a>
+							</li>
 						</ul>
 					</div>
 				</nav>

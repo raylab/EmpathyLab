@@ -1,0 +1,47 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+	<h1 class="h2">Analyses List</h1>
+</div>
+
+<div class="table-responsive table-striped table-hover">
+	<table class="table table-striped table-sm">
+		<thead>
+			<tr>
+				<th>#</th>
+				<th>Name</th>
+				<th>A</th>
+				<th>B</th>
+				<th>C</th>
+				<th>D</th>
+				<th>H</th>
+				<th>L</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for analysis in analysis_list %}
+			<tr>
+				<td>{{ analysis.id }}</td>
+				<td>{{ analysis.name }}</td>
+				<td>{{ analysis.A }}</td>
+				<td>{{ analysis.B }}</td>
+				<td>{{ analysis.C }}</td>
+				<td>{{ analysis.D }}</td>
+				<td>{{ analysis.H }}</td>
+				<td>{{ analysis.L }}</td>
+				<td>
+					<a href="{% url 'analysis-detail' pk=analysis.id %}">View</a>,
+					<a href="{% url 'analysis_update' pk=analysis.id %}">Edit</a>,
+					<a class="text-danger" href="{% url 'analysis_delete' pk=analysis.id %}">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+<a class="btn btn-primary" href="{% url 'analysis_create' %}" role="button">Register new analysis</a>
+{% endblock %}
+
