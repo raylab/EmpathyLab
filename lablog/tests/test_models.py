@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lablog.models import Subject, Feedback, Stimulae, Record, Experiment
+from lablog.models import Subject, Feedback, Stimulae, Record, Experiment, Analysis
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from datetime import datetime, timezone
@@ -70,7 +70,7 @@ class FeedbackModelTest(TestCase):
             electrode2=2,
             electrode3=3,
             electrode4=4,
-            analysis='AnalysisText')
+            analysis=Analysis.objects.create(name='AnalysisText'))
 
     def test_has_electorode_positions(self):
         feedback = Feedback.objects.get(id=1)
@@ -81,7 +81,7 @@ class FeedbackModelTest(TestCase):
 
     def test_has_analysis_text(self):
         feedback = Feedback.objects.get(id=1)
-        self.assertEquals(feedback.analysis, 'AnalysisText')
+        self.assertEquals(feedback.analysis.name, 'AnalysisText')
 
     def test_representation_includes_positions_and_analysis(self):
         feedback = Feedback.objects.get(id=1)
@@ -204,7 +204,7 @@ class ExperimentModelTest(TestCase):
             electrode2=2,
             electrode3=3,
             electrode4=4,
-            analysis='AnalysisText')
+            analysis=Analysis.objects.create(name='AnalysisText'))
         Experiment.objects.create(
             title='SomeTitle',
             summary='SomeSummary',
@@ -234,7 +234,7 @@ class ExperimentModelTest(TestCase):
 
     def test_has_feedback_assotiated(self):
         sut = Experiment.objects.get(id=1)
-        self.assertEquals(sut.feedback.analysis, 'AnalysisText')
+        self.assertEquals(sut.feedback.analysis.name, 'AnalysisText')
 
     def test_can_create_experiment_with_same_stimulus_and_feedback(self):
         same_stimulus = Stimulae.objects.get(id=1)

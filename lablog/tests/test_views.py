@@ -3,7 +3,7 @@ from django.test import TestCase
 # Create your tests here.
 
 
-from lablog.models import Subject
+from lablog.models import Subject, Analysis
 from django.urls import reverse
 
 from django.contrib.auth.models import User, Permission
@@ -123,6 +123,10 @@ class FeedbackCreateViewTest(TestCase):
     Test case for Feedback creation view.
     """
 
+    @classmethod
+    def setUpTestData(cls):
+        Analysis.objects.create(name='SomeAnalysis')
+
     def setUp(self):
         User.objects.create_user(username='unprivileged', password='DAU12345')
 
@@ -160,7 +164,7 @@ class FeedbackCreateViewTest(TestCase):
             'electrode2': '2',
             'electrode3': '3',
             'electrode4': '4',
-            'analysis': 'default',
+            'analysis': '1',
         }
         resp = self.client.post(reverse('feedback_create'), form_data)
         self.assertRedirects(resp, reverse('feedback-detail', args=['1']))
