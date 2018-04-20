@@ -167,6 +167,16 @@ CREATE TABLE IF NOT EXISTS FRAME(
     SYNC_SIGNAL INTERGER NOT NULL,
     FOREIGN KEY(DUMP_ID) REFERENCES DUMP(ID)
 );
+CREATE TABLE IF NOT EXISTS TNES(
+    DUMP_ID INTEGER NOT NULL,
+    A REAL NOT NULL,
+    B REAL NOT NULL,
+    C REAL NOT NULL,
+    D REAL NOT NULL,
+    H REAL NOT NULL,
+    L REAL NOT NULL,
+    FOREIGN KEY(DUMP_ID) REFERENCES DUMP(ID)
+);
 """
 
 INSERT_DUMP = """
@@ -335,6 +345,19 @@ INSERT INTO FRAME (
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
+INSERT_TNES = """
+INSERT INTO TNES (
+    DUMP_ID,
+    A,
+    B,
+    C,
+    D,
+    H,
+    L
+)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+"""
+
 
 def extract_bands(data):
     band_names = [
@@ -401,6 +424,14 @@ def extract_emostate(data):
     return emostates
 
 
+def extract_tnes(data):
+    param_names = ["A", "B", "C", "D", "H", "L"]
+    tnes = list()
+    for param in param_names:
+        tnes.append(data["tnes"][param])
+    return tnes
+
+
 def extract_frames(data):
     fields = [
         "COUNTER",
@@ -452,6 +483,7 @@ class Data:
     def append_json(self, data):
         bands = extract_bands(data)
         eq = extract_eq(data)
+        tnes = extract_tnes(data)
         emostate = None
         if "Emostate" in data:
             emostate = extract_emostate(data)
@@ -463,6 +495,7 @@ class Data:
             dump_id = c.lastrowid
             bands.insert(0, dump_id)
             eq.insert(0, dump_id)
+            tnes.insert(0, dump_id)
             c.execute(INSERT_BANDS, bands)
             c.execute(INSERT_EQ, eq)
             if emostate:
@@ -470,4 +503,5 @@ class Data:
                 c.execute(INSERT_EMOSTATE, emostate)
             for frame in frames:
                 frame.insert(0, dump_id)
+            c.execute(INSERT_TNES, tnes)
             c.executemany(INSERT_FRAME, frames)

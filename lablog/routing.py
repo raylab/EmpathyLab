@@ -5,4 +5,5 @@ from . import consumers
 websocket_urlpatterns = [
     path('ws/sensors', consumers.SensorsConsumer),
     path('ws/api', consumers.WebAPIConsumer),
+    path('ws/tnes/<str:sensor>', consumers.TNESConsumer),
 ]

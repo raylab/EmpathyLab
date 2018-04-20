@@ -1,4 +1,5 @@
-from channels.generic.websocket import JsonWebsocketConsumer
+from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer, AsyncJsonWebsocketConsumer
+from channels.consumer import SyncConsumer
 from django.template import defaultfilters
 from asgiref.sync import async_to_sync
 from lablog.models import Record, Experiment
@@ -44,16 +45,21 @@ class SensorsConsumer(JsonWebsocketConsumer):
         )
 
     def receive_json(self, content):
+        if self.is_recorded:
+            self.analaze(content)
+            self.eeg.append_json(content)
+
         async_to_sync(self.channel_layer.group_send)(
-            "webui",
+            "raw",
             {
-                "type": "webui.raw_sensor",
+                "type": "raw.sensor",
                 "channel": self.channel_name,
                 "data": content
             },
         )
-        if self.is_recorded:
-            self.eeg.append_json(content)
+
+    def analaze(self, content):
+        content["tnes"] = self.analysis
 
     def sensors_start_recording(self, event):
         if not self.is_recorded:
@@ -64,6 +70,15 @@ class SensorsConsumer(JsonWebsocketConsumer):
             record_obj.save()
             self.experiment.records.add(record_obj)
             self.record = record_obj.id
+            analysis = self.experiment.feedback.analysis
+            self.analysis = {
+                "A": analysis.A,
+                "B": analysis.B,
+                "C": analysis.C,
+                "D": analysis.D,
+                "H": analysis.H,
+                "L": analysis.L
+            }
             self.is_recorded = True
             self.sensors_update()
             self.sensors_add_record(self.experiment, record_obj)
@@ -135,6 +150,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
 
     def connect(self):
         async_to_sync(self.channel_layer.group_add)("webui", self.channel_name)
+        async_to_sync(self.channel_layer.group_add)("raw", self.channel_name)
         self.accept()
         async_to_sync(self.channel_layer.group_send)(
             "sensors",
@@ -148,6 +164,9 @@ class WebAPIConsumer(JsonWebsocketConsumer):
         async_to_sync(
             self.channel_layer.group_discard)(
             "webui", self.channel_name)
+        async_to_sync(
+            self.channel_layer.group_discard)(
+            "raw", self.channel_name)
 
     def receive_json(self, content):
         if content['command'] == 'start_recording':
@@ -222,9 +241,23 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             }
         })
 
-    def webui_raw_sensor(self, event):
+    def raw_sensor(self, event):
         self.send_json({
             'command': 'raw_sensor',
             'sensor': event["channel"],
             'data': event["data"]
         })
+
+
+class TNESConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add("raw", self.channel_name)
+        await self.accept()
+        self.sensor = self.scope['url_route']['kwargs']['sensor']
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("raw", self.channel_name)
+
+    async def raw_sensor(self, event):
+        if event["channel"] == self.sensor and "tnes" in event["data"]:
+            await self.send_json(event["data"]["tnes"])
