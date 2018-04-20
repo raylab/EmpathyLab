@@ -5,6 +5,8 @@ from django.views import generic
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .forms import ExperimentForm, AnalysisForm
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 def index(request):
@@ -227,6 +229,23 @@ class AnalysisCreate(CreateView):
 class AnalysisUpdate(UpdateView):
     form_class = AnalysisForm
     model = Analysis
+
+    def form_valid(self, form):
+        url = super().form_valid(form)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)("sensors", {
+            "type": "sensors.update_analysis",
+            "analysis": {
+                "A": self.object.A,
+                "B": self.object.B,
+                "C": self.object.C,
+                "D": self.object.D,
+                "H": self.object.H,
+                "L": self.object.L
+            },
+            "id": self.object.id,
+        })
+        return url
 
 
 class AnalysisDelete(DeleteView):

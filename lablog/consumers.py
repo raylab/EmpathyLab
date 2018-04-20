@@ -71,6 +71,7 @@ class SensorsConsumer(JsonWebsocketConsumer):
             self.experiment.records.add(record_obj)
             self.record = record_obj.id
             analysis = self.experiment.feedback.analysis
+            self.analysis_id = analysis.id
             self.analysis = {
                 "A": analysis.A,
                 "B": analysis.B,
@@ -141,6 +142,10 @@ class SensorsConsumer(JsonWebsocketConsumer):
                 "record": self.record,
             },
         )
+
+    def sensors_update_analysis(self, event):
+        if self.is_recorded and self.analysis_id == event["id"]:
+            self.analysis = event["analysis"]
 
 
 class WebAPIConsumer(JsonWebsocketConsumer):
