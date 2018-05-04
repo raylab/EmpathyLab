@@ -256,9 +256,9 @@ class WebAPIConsumer(JsonWebsocketConsumer):
 
 class TNESConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
+        self.sensor = self.scope['url_route']['kwargs']['sensor']
         await self.channel_layer.group_add("raw", self.channel_name)
         await self.accept()
-        self.sensor = self.scope['url_route']['kwargs']['sensor']
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard("raw", self.channel_name)
@@ -266,3 +266,17 @@ class TNESConsumer(AsyncJsonWebsocketConsumer):
     async def raw_sensor(self, event):
         if event["channel"] == self.sensor and "tnes" in event["data"]:
             await self.send_json(event["data"]["tnes"])
+
+
+class PublicConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        self.sensor = self.scope['url_route']['kwargs']['sensor']
+        await self.channel_layer.group_add("raw", self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("raw", self.channel_name)
+
+    async def raw_sensor(self, event):
+        if event["channel"] == self.sensor:
+            await self.send_json(event["data"])
