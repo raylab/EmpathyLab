@@ -8,3 +8,4 @@ Django==2.0.4
 django-extensions==2.0.6
 psycopg2==2.7.4
 whitenoise==3.3.1
+wsaccel==0.6.2
