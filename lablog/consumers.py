@@ -6,6 +6,7 @@ from lablog.models import Record, Experiment
 from datetime import datetime, timezone
 from lablog import eeg
 from django.conf import settings
+from datetime import datetime
 
 
 class SensorsConsumer(JsonWebsocketConsumer):
@@ -14,8 +15,13 @@ class SensorsConsumer(JsonWebsocketConsumer):
     """
 
     def connect(self):
+        self.id = 0
         self.is_recorded = False
-        self.record = 0
+        self.analysis = None
+        self.analysis_id = None
+        self.record = None
+        self.eeg_filename = None
+
         async_to_sync(
             self.channel_layer.group_add)(
             "sensors",
@@ -44,57 +50,39 @@ class SensorsConsumer(JsonWebsocketConsumer):
             },
         )
 
-    def receive_json(self, content):
-        if self.is_recorded:
-            self.analaze(content)
-            self.eeg.append_json(content)
+    def receive_json(self, data):
+        self.id += 1
+        data["ID"] = self.id
+        data["TIMESTAMP"] = str(datetime.now())
+        if self.eeg_filename:
+            data["record_filename"] = self.eeg_filename
+            data["tnes"] = self.analysis
+            eeg.add_eeg(data["record_filename"], data)
 
         async_to_sync(self.channel_layer.group_send)(
             "raw",
             {
                 "type": "raw.sensor",
                 "channel": self.channel_name,
-                "data": content
+                "data": data
             },
         )
 
-    def analaze(self, content):
-        content["tnes"] = self.analysis
-
     def sensors_start_recording(self, event):
-        if not self.is_recorded:
-            self.experiment = Experiment.objects.get(id=event["experiment"])
-            self.eeg = eeg.Data(settings.EEGDATA_STORE_PATH)
-            record_obj = Record.objects.create(
-                StartTime=datetime.now(tz=timezone.utc), EEG=self.eeg.filename)
-            record_obj.save()
-            self.experiment.records.add(record_obj)
-            self.record = record_obj.id
-            analysis = self.experiment.feedback.analysis
-            self.analysis_id = analysis.id
-            self.analysis = {
-                "A": analysis.A,
-                "B": analysis.B,
-                "C": analysis.C,
-                "D": analysis.D,
-                "H": analysis.H,
-                "L": analysis.L
-            }
-            self.is_recorded = True
-            self.sensors_update()
-            self.sensors_add_record(self.experiment, record_obj)
+        self.eeg_filename = event["eeg_filename"]
+        self.record = event["record"]
+        self.analysis_id = event["analysis_id"]
+        self.analysis = event["analysis"]
+        self.is_recorded = True
+        self.sensors_update()
 
     def sensors_stop_recording(self, event):
-        if self.is_recorded:
-            self.is_recorded = False
-            record_obj = Record.objects.get(pk=self.record)
-            record_obj.StopTime = datetime.now(tz=timezone.utc)
-            record_obj.save()
-            self.sensors_update_record(self.experiment, record_obj)
-            self.eeg = None
-            self.experiment = None
-            self.record = 0
-            self.sensors_update()
+        self.is_recorded = False
+        self.analysis = None
+        self.analysis_id = None
+        self.record = None
+        self.eeg_filename = None
+        self.sensors_update()
 
     def sensors_update(self):
         async_to_sync(self.channel_layer.group_send)(
@@ -106,31 +94,6 @@ class SensorsConsumer(JsonWebsocketConsumer):
                 "record": self.record,
             },
         )
-
-    def sensors_add_record(self, experiment, record):
-        async_to_sync(
-            self.channel_layer.group_send)(
-            "webui",
-            {"type": "webui.add_record", "channel": self.channel_name,
-             "experiment": experiment.id, "record_id": record.id,
-             "record_StartTime": defaultfilters.date(
-                 record.StartTime, "DATETIME_FORMAT"),
-             "record_StopTime": "",
-             "record_ObservationMedia1": record.ObservationMedia1,
-             "record_ObservationMedia2": record.ObservationMedia2, },)
-
-    def sensors_update_record(self, experiment, record):
-        async_to_sync(
-            self.channel_layer.group_send)(
-            "webui",
-            {"type": "webui.update_record", "channel": self.channel_name,
-             "experiment": experiment.id, "record_id": record.id,
-             "record_StartTime": defaultfilters.date(
-                 record.StartTime, "DATETIME_FORMAT"),
-             "record_StopTime": defaultfilters.date(
-                 record.StopTime, "DATETIME_FORMAT"),
-             "record_ObservationMedia1": record.ObservationMedia1,
-             "record_ObservationMedia2": record.ObservationMedia2, },)
 
     def sensors_ping(self, event):
         async_to_sync(self.channel_layer.send)(
@@ -173,25 +136,82 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             self.channel_layer.group_discard)(
             "raw", self.channel_name)
 
+    def start_recording(self, channel, experiment_id):
+        eeg_filename = str(eeg.generate_name())
+        start = datetime.now(tz=timezone.utc)
+        record = Record.objects.create(StartTime=start, EEG=eeg_filename)
+        record.save()
+        experiment = Experiment.objects.get(id=experiment_id)
+        experiment.records.add(record)
+        async_to_sync(self.channel_layer.group_send)(
+            "webui",
+            {
+                "type": "webui.add_record",
+                "experiment": experiment_id, "record_id": record.id,
+                "record_StartTime": defaultfilters.date(
+                        record.StartTime, "DATETIME_FORMAT"),
+                "record_StopTime": "",
+                "record_ObservationMedia1": record.ObservationMedia1,
+                "record_ObservationMedia2": record.ObservationMedia2
+            }
+        )
+        analysis = experiment.feedback.analysis
+        analysis_id = analysis.id
+        analysis_values = {
+            "A": analysis.A,
+            "B": analysis.B,
+            "C": analysis.C,
+            "D": analysis.D,
+            "H": analysis.H,
+            "L": analysis.L
+        }
+        async_to_sync(self.channel_layer.send)(
+            channel,
+            {
+                "type": "sensors.start_recording",
+                "channel": self.channel_name,
+                "eeg_filename": eeg_filename,
+                "record": record.id,
+                "analysis_id": analysis_id,
+                "analysis": analysis_values
+            },
+        )
+
+    def stop_recording(self, channel, record_id):
+        async_to_sync(self.channel_layer.send)(
+            channel,
+            {
+                "type": "sensors.stop_recording",
+                "channel": self.channel_name,
+                "record": record_id,
+            },
+        )
+        record = Record.objects.get(pk=record_id)
+        record.StopTime = datetime.now(tz=timezone.utc)
+        record.save()
+        async_to_sync(
+            self.channel_layer.group_send)(
+            "webui",
+            {
+                "type": "webui.update_record",
+                "record": {
+                    "id": record.id,
+                    "StartTime": defaultfilters.date(
+                        record.StartTime,
+                        "DATETIME_FORMAT"),
+                    "StopTime": defaultfilters.date(
+                        record.StopTime,
+                        "DATETIME_FORMAT"),
+                    "ObservationMedia1": record.ObservationMedia1,
+                    "ObservationMedia2": record.ObservationMedia2}})
+
     def receive_json(self, content):
-        if content['command'] == 'start_recording':
-            async_to_sync(self.channel_layer.send)(
-                content["channel"],
-                {
-                    "type": "sensors.start_recording",
-                    "channel": self.channel_name,
-                    "experiment": content["experiment"],
-                },
-            )
-        elif content['command'] == 'stop_recording':
-            async_to_sync(self.channel_layer.send)(
-                content["channel"],
-                {
-                    "type": "sensors.stop_recording",
-                    "channel": self.channel_name,
-                    "record": content["record"],
-                },
-            )
+        cmd = content['command']
+        channel = content['channel']
+        if cmd == 'start_recording':
+            self.start_recording(channel, content["experiment"])
+        elif cmd == 'stop_recording':
+            self.stop_recording(channel, content["record"])
         else:
             self.send_json({
                 'command': 'error_command',
@@ -236,14 +256,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
     def webui_update_record(self, event):
         self.send_json({
             'command': 'update_record',
-            'experiment': event["experiment"],
-            'record': {
-                'id': event["record_id"],
-                'StartTime': event["record_StartTime"],
-                'StopTime': event["record_StopTime"],
-                'ObservationMedia1': event['record_ObservationMedia1'],
-                'ObservationMedia2': event['record_ObservationMedia2']
-            }
+            'record': event['record'],
         })
 
     def raw_sensor(self, event):

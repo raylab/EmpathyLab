@@ -4,13 +4,13 @@
 from uuid import uuid4
 import sqlite3
 import pathlib
+from django.conf import settings
 
-__all__ = ["Data"]
-
-# ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+__all__ = ["generate_name", "Data"]
 
 CREATE_TABLES_SCRIPT = """
 PRAGMA foreign_keys = ON;
+PRAGMA synchronous = OFF;
 CREATE TABLE IF NOT EXISTS DUMP(
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     TIMESTAMP TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS TNES(
 """
 
 INSERT_DUMP = """
-INSERT INTO DUMP (USERID,RECORDNUMBER) VALUES (?, ?)
+INSERT INTO DUMP (ID,TIMESTAMP,USERID,RECORDNUMBER) VALUES (?, ?, ?, ?)
 """
 
 
@@ -469,39 +469,45 @@ def extract_frames(data):
     return frames
 
 
-class Data:
-    """EEG data storage"""
+def generate_name():
+    path = settings.EEGDATA_STORE_PATH
+    base = pathlib.Path(path)
+    base.mkdir(parents=True, exist_ok=True)
+    filename = pathlib.Path(str(uuid4()) + ".db")
+    filepath = base / filename
+    db = sqlite3.connect(str(filepath), check_same_thread=False)
+    db.executescript(CREATE_TABLES_SCRIPT)
+    db.commit()
+    return filepath
 
-    def __init__(self, path):
-        base = pathlib.Path(path)
-        base.mkdir(parents=True, exist_ok=True)
-        self.filename = pathlib.Path(str(uuid4()) + ".db")
-        self.filepath = base / self.filename
-        self.db = sqlite3.connect(str(self.filepath), check_same_thread=False)
-        self.db.executescript(CREATE_TABLES_SCRIPT)
 
-    def append_json(self, data):
-        bands = extract_bands(data)
-        eq = extract_eq(data)
-        tnes = extract_tnes(data)
-        emostate = None
-        if "Emostate" in data:
-            emostate = extract_emostate(data)
-        frames = extract_frames(data)
+def add_eeg(filename, data):
+    db = sqlite3.connect(data['record_filename'], check_same_thread=False)
+    bands = extract_bands(data)
+    eq = extract_eq(data)
+    tnes = extract_tnes(data)
+    emostate = None
+    if "Emostate" in data:
+        emostate = extract_emostate(data)
+    frames = extract_frames(data)
 
-        with self.db:
-            c = self.db.cursor()
-            c.execute(INSERT_DUMP, [data["userID"], data["RecordNumber"]])
-            dump_id = c.lastrowid
-            bands.insert(0, dump_id)
-            eq.insert(0, dump_id)
-            tnes.insert(0, dump_id)
-            c.execute(INSERT_BANDS, bands)
-            c.execute(INSERT_EQ, eq)
-            if emostate:
-                emostate.insert(0, dump_id)
-                c.execute(INSERT_EMOSTATE, emostate)
-            for frame in frames:
-                frame.insert(0, dump_id)
-            c.execute(INSERT_TNES, tnes)
-            c.executemany(INSERT_FRAME, frames)
+    with db:
+        c = db.cursor()
+        dump_id = int(data["ID"])
+        timestamp = data["TIMESTAMP"]
+        c.execute(
+            INSERT_DUMP,
+            [dump_id, timestamp, data["userID"],
+             data["RecordNumber"]])
+        bands.insert(0, dump_id)
+        eq.insert(0, dump_id)
+        tnes.insert(0, dump_id)
+        c.execute(INSERT_BANDS, bands)
+        c.execute(INSERT_EQ, eq)
+        if emostate:
+            emostate.insert(0, dump_id)
+            c.execute(INSERT_EMOSTATE, emostate)
+        for frame in frames:
+            frame.insert(0, dump_id)
+        c.execute(INSERT_TNES, tnes)
+        c.executemany(INSERT_FRAME, frames)
