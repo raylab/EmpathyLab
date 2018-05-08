@@ -270,11 +270,11 @@ class WebAPIConsumer(JsonWebsocketConsumer):
 class TNESConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.sensor = self.scope['url_route']['kwargs']['sensor']
-        await self.channel_layer.group_add("raw", self.channel_name)
+        await self.channel_layer.group_add("tnes", self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard("raw", self.channel_name)
+        await self.channel_layer.group_discard("tnes", self.channel_name)
 
     async def raw_sensor(self, event):
         if event["channel"] == self.sensor and "tnes" in event["data"]:
@@ -293,3 +293,34 @@ class PublicConsumer(AsyncJsonWebsocketConsumer):
     async def raw_sensor(self, event):
         if event["channel"] == self.sensor:
             await self.send_json(event["data"])
+
+
+class AnalyzercConsumer(JsonWebsocketConsumer):
+    def connect(self):
+        self.sensor = self.scope['url_route']['kwargs']['sensor']
+        async_to_sync(
+            self.channel_layer.group_add)(
+            "raw",
+            self.channel_name)
+        self.accept()
+
+    def disconnect(self, close_code):
+        async_to_sync(
+            self.channel_layer.group_discard)(
+            "raw",
+            self.channel_name)
+
+    def raw_sensor(self, event):
+        if event["channel"] == self.sensor:
+            self.send_json(event["data"])
+
+    def receive_json(self, data):
+        eeg.add_tnes(data["record_filename"], data)
+        async_to_sync(self.channel_layer.group_send)(
+            "tnes",
+            {
+                "type": "raw.sensor",
+                "channel": self.sensor,
+                "data": data
+            },
+        )

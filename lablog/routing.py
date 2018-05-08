@@ -7,4 +7,5 @@ websocket_urlpatterns = [
     path('ws/api', consumers.WebAPIConsumer),
     path('ws/tnes/<str:sensor>', consumers.TNESConsumer),
     path('ws/public/<str:sensor>', consumers.PublicConsumer),
+    path('ws/analyzer/<str:sensor>', consumers.AnalyzercConsumer),
 ]

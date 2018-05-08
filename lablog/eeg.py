@@ -481,11 +481,20 @@ def generate_name():
     return filepath
 
 
+def add_tnes(filename, data):
+    tnes = extract_tnes(data)
+    dump_id = int(data["ID"])
+    db = sqlite3.connect(data['record_filename'], check_same_thread=False)
+    with db:
+        tnes.insert(0, dump_id)
+        c = db.cursor()
+        c.execute(INSERT_TNES, tnes)
+
+
 def add_eeg(filename, data):
     db = sqlite3.connect(data['record_filename'], check_same_thread=False)
     bands = extract_bands(data)
     eq = extract_eq(data)
-    tnes = extract_tnes(data)
     emostate = None
     if "Emostate" in data:
         emostate = extract_emostate(data)
@@ -501,7 +510,6 @@ def add_eeg(filename, data):
              data["RecordNumber"]])
         bands.insert(0, dump_id)
         eq.insert(0, dump_id)
-        tnes.insert(0, dump_id)
         c.execute(INSERT_BANDS, bands)
         c.execute(INSERT_EQ, eq)
         if emostate:
@@ -509,5 +517,4 @@ def add_eeg(filename, data):
             c.execute(INSERT_EMOSTATE, emostate)
         for frame in frames:
             frame.insert(0, dump_id)
-        c.execute(INSERT_TNES, tnes)
         c.executemany(INSERT_FRAME, frames)
