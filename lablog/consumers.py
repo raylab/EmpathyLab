@@ -277,13 +277,14 @@ class TNESConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard("tnes", self.channel_name)
 
     async def raw_sensor(self, event):
-        if event["channel"] == self.sensor and "tnes" in event["data"]:
+        if event["data"]["RecordNumber"] == self.sensor and "tnes" in event["data"]:
             await self.send_json(event["data"]["tnes"])
 
 
 class PublicConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.sensor = self.scope['url_route']['kwargs']['sensor']
+        print(self.sensor)
         await self.channel_layer.group_add("raw", self.channel_name)
         await self.accept()
 
@@ -291,7 +292,7 @@ class PublicConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard("raw", self.channel_name)
 
     async def raw_sensor(self, event):
-        if event["channel"] == self.sensor:
+        if event["data"]["RecordNumber"] == self.sensor:
             await self.send_json(event["data"])
 
 
@@ -311,7 +312,7 @@ class AnalyzercConsumer(JsonWebsocketConsumer):
             self.channel_name)
 
     def raw_sensor(self, event):
-        if event["channel"] == self.sensor:
+        if event["data"]["RecordNumber"] == self.sensor:
             self.send_json(event["data"])
 
     def receive_json(self, data):

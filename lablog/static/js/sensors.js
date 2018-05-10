@@ -191,6 +191,7 @@ const Headset = {
         emostate = data.Emostate;
         Chart.emostates[item.getAttribute('data-channel')] = emostate;
       }
+      item.firstChild.firstChild.nodeValue = data.RecordNumber;
       window.requestAnimationFrame(() => {
         Chart.draw(charts[i], frames, emostate);
       });
