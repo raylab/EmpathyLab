@@ -26,6 +26,7 @@
 
 <p> You have visited this page {{ num_visits }} times. </p>
 
+{% if user.is_authenticated %}
 <div class="card">
   <div class="card-header">
     Connected headsets
@@ -34,4 +35,5 @@
   </ul>
 </div>
 <script src="{% static 'js/sensors.js' %}"></script>
+{% endif %}
 {% endblock %}

@@ -45,6 +45,7 @@
 								</a>
 							</li>
 
+					{% if user.is_authenticated %}
 							<li class="nav-item">
 								<a class="nav-link {% if request.resolver_match.view_name == "subjects" %}active{% endif %}" href="{% url 'subjects' %}">
 									<span data-feather="users"></span>
@@ -71,6 +72,7 @@
 									Analyses
 								</a>
 							</li>
+					{% endif %}
 						</ul>
 					</div>
 				</nav>
