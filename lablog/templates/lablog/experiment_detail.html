@@ -8,13 +8,16 @@
   {% if experiment.DateTime %}
   <small class="text-muted">{{experiment.DateTime}}</small>
   {% endif %}
+  {% if user.is_authenticated %}
   <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group mr-2">
       <a href="{% url 'experiment_update' pk=experiment.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
       <a href="{% url 'experiment_delete' pk=experiment.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
     </div>
   </div>
+  {% endif %}
 </div>
+{% if user.is_authenticated %}
 <p class="lead">
 {{experiment.summary}}
 </p>
@@ -149,5 +152,10 @@
   </table>
 </div>
 <script src="{% static 'js/sensors.js' %}"></script>
+{% else %}
+<div class="embed-responsive embed-responsive-4by3">
+  <video class="embed-responsive-item" src="{{ experiment.stimulae.media1.url }}"></iframe>
+</div>
+{% endif %}
 {% endblock %}
 
