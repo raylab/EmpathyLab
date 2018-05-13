@@ -30,9 +30,11 @@
 				<td>{{ experiment.stimulae.name }}</td>
 				<td>{{ experiment.feedback.analysis }}</td>
 				<td>
-					<a href="{% url 'experiment-detail' pk=experiment.id %}">View</a>,
-					<a href="{% url 'experiment_update' pk=experiment.id %}">Edit</a>,
+					<a href="{% url 'experiment-detail' pk=experiment.id %}">View</a>
+					{% if user.is_authenticated %}
+					,<a href="{% url 'experiment_update' pk=experiment.id %}">Edit</a>,
 					<a class="text-danger" href="{% url 'experiment_delete' pk=experiment.id %}">Delete</a>
+					{% endif %}
 				</td>
 			</tr>
 			{% endfor %}
