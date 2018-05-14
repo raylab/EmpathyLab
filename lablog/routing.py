@@ -8,4 +8,5 @@ websocket_urlpatterns = [
     path('ws/tnes/<str:sensor>', consumers.TNESConsumer),
     path('ws/public/<str:sensor>', consumers.PublicConsumer),
     path('ws/analyzer/<str:sensor>', consumers.AnalyzercConsumer),
+    path('ws/video', consumers.VideoControlConsumer),
 ]

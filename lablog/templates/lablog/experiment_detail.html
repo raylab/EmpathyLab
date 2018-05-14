@@ -154,8 +154,9 @@
 <script src="{% static 'js/sensors.js' %}"></script>
 {% else %}
 <div class="embed-responsive embed-responsive-4by3">
-  <video class="embed-responsive-item" src="{{ experiment.stimulae.media1.url }}"></iframe>
+  <video class="embed-responsive-item js-video-control" data-experiment="{{ experiment.id }}" src="{{ experiment.stimulae.media1.url }}"></iframe>
 </div>
+<script src="{% static 'js/video_control.js' %}"></script>
 {% endif %}
 {% endblock %}
 

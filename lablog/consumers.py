@@ -325,3 +325,26 @@ class AnalyzercConsumer(JsonWebsocketConsumer):
                 "data": data
             },
         )
+
+
+class VideoControlConsumer(JsonWebsocketConsumer):
+    def connect(self):
+        self.accept()
+
+    def disconnect(self, close_code):
+        pass
+
+    def receive_json(self, data):
+        cmd = data['type']
+        if cmd == 'video.getPlaybackState':
+            self.get_playback_state(data['experiment'])
+        else:
+            self.send_json({
+                'type': 'error_command',
+                'message': 'Unrecognized command'
+            })
+
+    def get_playback_state(self, experiment_id):
+        # TODO: get experiment state
+        # TODO: Send "play" command with time if experiment currently recorded
+        pass
