@@ -10,7 +10,7 @@ The main features that have currently been implemented are:
 * There are models for experiments, records, stimulate, feedback and subjects.
 * Users can view list and detail information for experiments and subjects.
 * Admin users can create and manage models. The admin has been optimized (the basic registration is present in admin.py, but commented out).
-* Librarians can renew reserved records
+
 
 # EmpathyLab
 
