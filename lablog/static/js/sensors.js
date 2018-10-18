@@ -10,6 +10,7 @@ const RecordButton = {
       isRecording ? 'btn-danger' : 'btn-secondary'}`;
     dom.textContent = isRecording ? 'Stop' : 'Record';
     dom.setAttribute('data-active', isRecording);
+    dom.setAttribute('name','none');
   },
   getAll(container = document.body) {
     return container.querySelectorAll('.js-record-button');
@@ -156,6 +157,7 @@ const Headset = {
     header.appendChild(document.createTextNode(sensor));
     if (showRecordButton) {
       const btn = RecordButton.create(isRecording);
+      btn.setAttribute('name', sensor);
       btn.addEventListener('click', () => {
         if (btn.getAttribute('data-active') === 'true') {
           WebAPI.stopRecording(sensor, item.getAttribute('data-record'));

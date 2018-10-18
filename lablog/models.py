@@ -169,6 +169,28 @@ class Record(models.Model):
     ObservationMedia1 = models.CharField(max_length=200, blank=True)
     ObservationMedia2 = models.CharField(max_length=200, blank=True)
 
+    def get_subject(self):
+        mySubj = Subject.objects.filter(id=self.id).values()[0]
+
+        return {
+                'first_name':mySubj['first_name'],
+                'last_name':mySubj['last_name'],
+        }
+
+    def get_experiment(self):
+        myExp = Experiment.objects.filter(records=self.id).values()[0]
+
+        return {
+                'title':myExp['title'],
+                'summary':myExp['summary'],
+                'stimulae_id':myExp['stimulae_id'],
+                'feedback_id':myExp['feedback_id']
+        }
+
+    def get_recorddb(self):
+        my_file = self.EEG.split('/')[-1:]
+        return str(my_file[0])
+
     class Meta:
         permissions = (("can_change_status", "Set record status"),)
 

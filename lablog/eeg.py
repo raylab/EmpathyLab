@@ -4,6 +4,7 @@
 from uuid import uuid4
 import sqlite3
 import pathlib
+import time
 from django.conf import settings
 
 __all__ = ["generate_name", "Data"]
@@ -469,12 +470,17 @@ def extract_frames(data):
     return frames
 
 
-def generate_name():
+def generate_name(headset):
     path = settings.EEGDATA_STORE_PATH
     base = pathlib.Path(path)
     base.mkdir(parents=True, exist_ok=True)
-    filename = pathlib.Path(str(uuid4()) + ".db")
+    #filename = pathlib.Path(str(uuid4()) + ".db") #Replacing UUID with Record Number from the EPOC Harvister
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    filename = pathlib.Path(headset + "_" + timestr + ".db")  
     filepath = base / filename
+    #if filepath.is_file():
+    #    filename = pathlib.Path(headset + "_z" + ".db")
+    #    filepath = base / filename
     db = sqlite3.connect(str(filepath), check_same_thread=False)
     db.executescript(CREATE_TABLES_SCRIPT)
     db.commit()

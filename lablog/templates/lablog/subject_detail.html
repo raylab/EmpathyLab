@@ -18,9 +18,11 @@
 <hl>
 <h4>Records</h4>
 
+<p><a href=""></p>
+
 <dl>
 {% for record in subject.record_set.all %}
-  <dt><a href="{% url 'record-detail' record.id %}">{{record.imprint}}</a></dt>
+  <dt><a href="{% url 'record-detail' record.id %}">{{record}}</a></dt>
   <dd>Attendant: {{record.attendant}}</dd>
 {% endfor %}
 </dl>

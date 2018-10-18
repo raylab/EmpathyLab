@@ -54,6 +54,7 @@ class SensorsConsumer(JsonWebsocketConsumer):
         self.id += 1
         data["ID"] = self.id
         data["TIMESTAMP"] = str(datetime.now())
+        #print("Got DATA:"+data['RecordNumber']) #Getting raw data from Harvister
         if self.eeg_filename:
             data["record_filename"] = self.eeg_filename
             data["tnes"] = self.analysis
@@ -115,11 +116,12 @@ class WebAPIConsumer(JsonWebsocketConsumer):
     """
     Communicates with client-side script
     """
-
     def connect(self):
+        self.headset_name = None
+
         async_to_sync(self.channel_layer.group_add)("webui", self.channel_name)
         async_to_sync(self.channel_layer.group_add)("raw", self.channel_name)
-        self.accept()
+        self.accept()       
         async_to_sync(self.channel_layer.group_send)(
             "sensors",
             {
@@ -137,7 +139,8 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             "raw", self.channel_name)
 
     def start_recording(self, channel, experiment_id):
-        eeg_filename = str(eeg.generate_name())
+        #eeg_filename = str(eeg.generate_name())#FileName will be same as Record Number 
+        eeg_filename = str(eeg.generate_name(self.headset_name))#in the EPOC Hartvister with timestamp
         start = datetime.now(tz=timezone.utc)
         record = Record.objects.create(StartTime=start, EEG=eeg_filename)
         record.save()
@@ -208,6 +211,8 @@ class WebAPIConsumer(JsonWebsocketConsumer):
     def receive_json(self, content):
         cmd = content['command']
         channel = content['channel']
+        #Recording commands from GUI
+
         if cmd == 'start_recording':
             self.start_recording(channel, content["experiment"])
         elif cmd == 'stop_recording':
@@ -233,6 +238,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
         })
 
     def webui_update_sensor(self, event):
+
         self.send_json({
             'command': 'update_sensor',
             'sensor': event["channel"],
@@ -259,8 +265,10 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             'record': event['record'],
         })
 
-    def raw_sensor(self, event):
-        self.send_json({
+    def raw_sensor(self, event): #Here raw json from sensor get's into the WebAPI
+        #print("Here:"+ str(event["data"]))
+        self.headset_name = event["data"]['RecordNumber'] #Here we catching Record Number from the EPOC
+        self.send_json({                                  #Harvister and storing it.
             'command': 'raw_sensor',
             'sensor': event["channel"],
             'data': event["data"]
@@ -284,7 +292,6 @@ class TNESConsumer(AsyncJsonWebsocketConsumer):
 class PublicConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.sensor = self.scope['url_route']['kwargs']['sensor']
-        print(self.sensor)
         await self.channel_layer.group_add("raw", self.channel_name)
         await self.accept()
 
