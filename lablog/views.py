@@ -7,6 +7,7 @@ from django.urls import reverse_lazy
 from .forms import ExperimentForm, AnalysisForm
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.core import serializers
 
 
 def index(request):
@@ -48,6 +49,9 @@ class ExperimentDetailView(generic.DetailView):
     Generic class-based detail view for a experiment.
     """
     model = Experiment
+    
+    #json_serializer = serializers.get_serializer("json")()
+    #subjectsIDs = json_serializer.serialize(Experiment.objects.get(), ensure_ascii=False)
 
 
 class StimulaeListView(generic.ListView):
@@ -112,7 +116,7 @@ class RecordDetailView(generic.DetailView):
 
 class RecordsAllListView(PermissionRequiredMixin, generic.ListView):
     """
-    Generic class-based view listing all records. Only visible to users with can_mark_returned permission.
+    Generic class-based view listing all records. Only visible to users with can_change_status permission.
     """
     model = Record
     permission_required = 'lablog.can_change_status'

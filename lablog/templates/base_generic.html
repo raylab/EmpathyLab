@@ -71,6 +71,7 @@
 									Analyses
 								</a>
 							</li>
+                            
 						</ul>
 					</div>
 				</nav>
@@ -92,5 +93,8 @@
 			feather.replace()
 		</script>
 		<script src="{% static 'js/sensors.js' %}"></script>
+        <!-- <script src="{% static 'js/sql.js' %}"></script> -->
+        <!-- <script src="{% static 'js/record_play.js' %}"></script> -->
+        {% block play_script %}{% endblock %}
 	</body>
 </html>

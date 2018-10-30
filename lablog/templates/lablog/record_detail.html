@@ -1,19 +1,38 @@
 {% extends "base_generic.html" %}
 
+{% load staticfiles%}
+
 {% block content %}
     <h1>Experiment: {{record.get_experiment.title}}</h1>
-    <p><h4>UID: {{record.id}}</h4></p>
-    <p><h4>Subject: {{record.get_subject.first_name}}  {{record.get_subject.last_name}}</h4></p>
-    <p><h4>Attendant: {{record.attendant}}</h4></p>
-    <p><h4>Date: {{record.rec_date}}</h4></p>
-    <p><h4>Experiment Summary:  {{record.get_experiment.summary}}</h4></p>
-<p><h4>Stimulae: {{record.get_experiment.stimulae_id}}</h4></p>
-<p><h4>Feedback: {{record.get_experiment.feedback_id}}</h4></p>
+    <p><h5>Record ID: {{record.id}}</h5></p>
+    <p><h5>Subject: {{record.get_subject.first_name}}  {{record.get_subject.last_name}}</h5></p>
+    <p><h5>Attendant: {{record.attendant}}</h5></p>
+    <p><h5>Date: {{record.rec_date}}</h5></p>
+    <p><h5>Experiment Summary:  {{record.get_experiment.summary}}</h5></p>
+<p><h5>Stimulae: {{record.get_experiment.stimulae_id}}</h5></p>
+<p><h5>Feedback: {{record.get_experiment.feedback_id}}</h5></p>
 <p>
 <p>{#record.get_experiment#}
 <p> 
 
-<p><h4>Record LevelDB: </h4></p> 
-<p><h6>{{record.get_recorddb}} </h></p>
-{% endblock %}
+<p><h5>Record DB file name: </h5></p> 
+<p><h6 id='dbfile' >{{record.get_recorddb}}</h6></p>
+<!-- <p><h6> <label class="button"><input type='file' id="dbfile" defaultValue="{{record.get_recorddb}}">{{record.get_recorddb}}</label></h6></p> -->
+<!-- <main> -->
+<!-- <label class="button">Load an SQLite database file: <input type='file' id='dbfile' ></label> -->
+<div id="error" class="error"></div>
+<pre id="output">Results will be displayed here</pre>
+<div class="card">
+  <div class="card-header">
+    Connected headsets
+  </div>
+  <ul class="list-group list-group-flush headsets-list">
+  </ul>
+</div>
 
+{% endblock %}
+{% block play_script %}
+<script src="{% static 'js/sql.js' %}"></script>
+ <script src="{% static 'js/record_play.js' %}"></script>
+
+{% endblock %}

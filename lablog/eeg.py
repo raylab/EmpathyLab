@@ -15,10 +15,10 @@ PRAGMA synchronous = OFF;
 CREATE TABLE IF NOT EXISTS DUMP(
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     TIMESTAMP TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    USERID INTEGER NOT NULL,
-    RECORDNUMBER TEXT NOT NULL
+    UserId INTEGER NOT NULL,
+    RecordNumber TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS BANDS(
+CREATE TABLE IF NOT EXISTS Bands(
     DUMP_ID INTEGER NOT NULL,
     IED_AF3_Theta REAL NOT NULL,
     IED_AF3_Alpha REAL NOT NULL,
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS EQ(
     IEE_CHAN_FP2 INTEGER NOT NULL,
     FOREIGN KEY(DUMP_ID) REFERENCES DUMP(ID)
 );
-CREATE TABLE IF NOT EXISTS EMOSTATE(
+CREATE TABLE IF NOT EXISTS Emostate(
     DUMP_ID INTEGER NOT NULL,
     Stress_Raw REAL NOT NULL,
     Stress_Min REAL NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS EMOSTATE(
     Interest_Scaled REAL NOT NULL,
     FOREIGN KEY(DUMP_ID) REFERENCES DUMP(ID)
 );
-CREATE TABLE IF NOT EXISTS FRAME(
+CREATE TABLE IF NOT EXISTS Frames(
     DUMP_ID INTEGER NOT NULL,
     COUNTER INTEGER NOT NULL,
     INTERPOLATED REAL NOT NULL,
@@ -181,12 +181,12 @@ CREATE TABLE IF NOT EXISTS TNES(
 """
 
 INSERT_DUMP = """
-INSERT INTO DUMP (ID,TIMESTAMP,USERID,RECORDNUMBER) VALUES (?, ?, ?, ?)
+INSERT INTO DUMP (ID,TIMESTAMP,UserId,RecordNumber) VALUES (?, ?, ?, ?)
 """
 
 
 INSERT_BANDS = """
-INSERT INTO BANDS (
+INSERT INTO Bands (
     DUMP_ID,
     IED_AF3_Theta,
     IED_AF3_Alpha,
@@ -287,7 +287,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
 INSERT_EMOSTATE = """
-INSERT INTO EMOSTATE (
+INSERT INTO Emostate (
     DUMP_ID,
     Stress_Raw,
     Stress_Min,
@@ -314,7 +314,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 """
 
 INSERT_FRAME = """
-INSERT INTO FRAME (
+INSERT INTO Frames (
     DUMP_ID,
     COUNTER,
     INTERPOLATED,
@@ -378,7 +378,7 @@ def extract_bands(data):
         'AF4']
     param_names = ['Theta', 'Alpha', 'LBeta', 'HBeta', 'Gamma']
     bands_dict = dict()
-    for b in data['bands']:
+    for b in data['Bands']:
         key, value = b.popitem()
         bands_dict[key] = value
 
@@ -462,7 +462,7 @@ def extract_frames(data):
         "MARKER",
         "SYNC_SIGNAL"]
     frames = list()
-    for frame in data["frames"]:
+    for frame in data["Frames"]:
         values = list()
         for field in fields:
             values.append(frame[field])
@@ -512,7 +512,7 @@ def add_eeg(filename, data):
         timestamp = data["TIMESTAMP"]
         c.execute(
             INSERT_DUMP,
-            [dump_id, timestamp, data["userID"],
+            [dump_id, timestamp, data["UserId"],
              data["RecordNumber"]])
         bands.insert(0, dump_id)
         eq.insert(0, dump_id)

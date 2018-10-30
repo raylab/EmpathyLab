@@ -10,12 +10,31 @@ const RecordButton = {
       isRecording ? 'btn-danger' : 'btn-secondary'}`;
     dom.textContent = isRecording ? 'Stop' : 'Record';
     dom.setAttribute('data-active', isRecording);
-    dom.setAttribute('name','none');
+    dom.setAttribute('subject-id', 'none');
   },
   getAll(container = document.body) {
     return container.querySelectorAll('.js-record-button');
   },
 };
+
+
+const SubjectSelector = {
+  create(experimentID) {
+    const item = document.createElement('select', {passive: true});
+    item.setAttribute('id', 'subject-select');
+    var myElement = document.getElementsByClassName("divsubject");
+    for (let i = 0; i < myElement.length; i += 1) {
+      subjId = document.createElement('option');
+      subjId.setAttribute('value', myElement[i].innerText);
+      t = document.createTextNode(myElement[i].innerText);
+      subjId.appendChild(t);
+      item.appendChild(subjId); 
+    }
+    return item;
+  },
+};
+
+
 
 function map(n, start1, stop1, start2, stop2) {
   return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
@@ -147,7 +166,7 @@ const Chart = {
 };
 
 const Headset = {
-  create(sensor, record, isRecording, showRecordButton) {
+  create(sensor, record, isRecording, showRecordButton, experimentID) {
     const item = document.createElement('li');
     item.className = 'js-headset-item list-group-item d-flex flex-column';
     item.setAttribute('data-channel', sensor);
@@ -157,7 +176,6 @@ const Headset = {
     header.appendChild(document.createTextNode(sensor));
     if (showRecordButton) {
       const btn = RecordButton.create(isRecording);
-      btn.setAttribute('name', sensor);
       btn.addEventListener('click', () => {
         if (btn.getAttribute('data-active') === 'true') {
           WebAPI.stopRecording(sensor, item.getAttribute('data-record'));
@@ -166,6 +184,13 @@ const Headset = {
         }
       });
       header.appendChild(btn);
+      const subjSelect = SubjectSelector.create(experimentID);
+      subjSelect.addEventListener('click', () => {
+          var subjId = subjSelect.options[subjSelect.selectedIndex].value;
+          item.setAttribute('subject-id', subjId);
+        {passive: true} 
+       });
+      header.appendChild(subjSelect);
     }
     item.appendChild(header);
     item.appendChild(Chart.create(sensor));
@@ -182,10 +207,11 @@ const Headset = {
 
   drawData(item, data) {
     const charts = Chart.getAll(item);
+    //console.log(data.Frames); //Get's data from the Headset and draws it.
     for (let i = 0; i < charts.length; i += 1) {
       const frames = Chart.queues[item.getAttribute('data-channel')];
       let emostate = Chart.emostates[item.getAttribute('data-channel')];
-      Array.prototype.push.apply(frames, data.frames);
+      Array.prototype.push.apply(frames, data.Frames);
       if (frames.length > charts[i].width) {
         frames.splice(0, frames.length - charts[i].width);
       }
@@ -201,6 +227,7 @@ const Headset = {
   },
 
   getAll(container = document.body) {
+    //console.log("HERE");
     return container.querySelectorAll('.js-headset-item');
   },
 
@@ -212,9 +239,10 @@ const Headset = {
 const HeadsetList = {
   addHeadset(list, sensor, record, isRecording) {
     const showRecordButton = list.hasAttribute('data-allow-recording');
-    const item = Headset.create(sensor, record, isRecording, showRecordButton);
+    const experimentID = list.getAttribute('data-experiment');
+    const item = Headset.create(sensor, record, isRecording, showRecordButton, experimentID);
     item.addEventListener('startRecording', () => {
-      WebAPI.startRecording(sensor, list.getAttribute('data-experiment'));
+      WebAPI.startRecording(sensor, list.getAttribute('data-experiment'), item.getAttribute('subject-id'));
     });
     list.appendChild(item);
   },
@@ -234,6 +262,7 @@ const HeadsetList = {
   },
 
   drawData(list, sensor, data) {
+    //'Frames' get here...
     const items = Headset.getBySensorAll(list, sensor);
     for (let i = 0; i < items.length; i += 1) {
       Headset.drawData(items[i], data);
@@ -305,6 +334,7 @@ function onUpdateRecord(data) {
 
 function onAddSensor(data) {
   const lists = HeadsetList.getAll();
+  //console.log("HERE-A:");
   for (let i = 0; i < lists.length; i += 1) {
     HeadsetList.addHeadset(lists[i], data.sensor, data.record, data.is_recorded);
   }
@@ -365,11 +395,17 @@ const WebAPI = {
     };
   },
 
-  startRecording(sensor, experiment) {
+  startRecording(sensor, experiment, subjectId) {
+    //console.log("START RECORDING:" + sensor);
+    if (subjectId === null){
+        getSubjId = confirm("SET SUBJECT ID");
+        return;
+    }
     this.socket.send(JSON.stringify({
       command: 'start_recording',
       channel: sensor,
       experiment,
+      subjectId,
     }));
   },
 

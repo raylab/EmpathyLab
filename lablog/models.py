@@ -164,13 +164,20 @@ class Record(models.Model):
     EEG = models.FilePathField(
         path=settings.EEGDATA_STORE_PATH,
         match=".*\.db$")
+    ExperimentId = models.ForeignKey(
+        'Experiment', on_delete=models.PROTECT,
+        )
+    SubjectId = models.ForeignKey(
+        Subject, on_delete=models.PROTECT,
+        )
     StartTime = models.DateTimeField(null=True, blank=True)
     StopTime = models.DateTimeField(null=True, blank=True)
     ObservationMedia1 = models.CharField(max_length=200, blank=True)
     ObservationMedia2 = models.CharField(max_length=200, blank=True)
 
     def get_subject(self):
-        mySubj = Subject.objects.filter(id=self.id).values()[0]
+        print("SubjectID:")#+subject_id)
+        mySubj = Subject.objects.filter(id=self.SubjectId_id).values()[0]
 
         return {
                 'first_name':mySubj['first_name'],
@@ -198,7 +205,14 @@ class Record(models.Model):
         """
         String for representing the Model object.
         """
-        return "record " + str(self.id)
+        return "record" + str(self.id)
+
+    def get_absolute_url(self):
+        """
+        Returns the url to access a particular subject instance.
+        """
+        return reverse('record-detail', args=[str(self.id)])
+
 
 
 class Experiment(models.Model):

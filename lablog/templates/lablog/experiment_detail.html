@@ -71,7 +71,7 @@
     <tbody>
       {% for subject in experiment.subjects.all %}
       <tr>
-        <td>{{ subject.id }}</td>
+        <td><div class="divsubject">{{ subject.id }}</div></td>
         <td>{{ subject.first_name }}</td>
         <td>{{ subject.last_name }}</td>
         <td>{{ subject.date_of_birth }}</td>

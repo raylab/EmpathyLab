@@ -27,6 +27,7 @@ class SensorsConsumer(JsonWebsocketConsumer):
             "sensors",
             self.channel_name)
         self.accept()
+        #print("Sensor connect:")
         async_to_sync(self.channel_layer.group_send)(
             "webui",
             {
@@ -97,6 +98,7 @@ class SensorsConsumer(JsonWebsocketConsumer):
         )
 
     def sensors_ping(self, event):
+        #print("Sensor ping:"+str(event))
         async_to_sync(self.channel_layer.send)(
             event["respond_channel"],
             {
@@ -138,11 +140,13 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             self.channel_layer.group_discard)(
             "raw", self.channel_name)
 
-    def start_recording(self, channel, experiment_id):
+    def start_recording(self, channel, experiment_id, subject_id):
+        #print("START RECORD:", channel, experiment_id, subject_id)
         #eeg_filename = str(eeg.generate_name())#FileName will be same as Record Number 
         eeg_filename = str(eeg.generate_name(self.headset_name))#in the EPOC Hartvister with timestamp
-        start = datetime.now(tz=timezone.utc)
-        record = Record.objects.create(StartTime=start, EEG=eeg_filename)
+        start = datetime.now(tz=timezone.utc)  
+        myExpr = Experiment.objects.filter(id=experiment_id).values()[0] 
+        record = Record.objects.create(StartTime=start, EEG=eeg_filename, ExperimentId_id=experiment_id , SubjectId_id=subject_id)
         record.save()
         experiment = Experiment.objects.get(id=experiment_id)
         experiment.records.add(record)
@@ -212,9 +216,9 @@ class WebAPIConsumer(JsonWebsocketConsumer):
         cmd = content['command']
         channel = content['channel']
         #Recording commands from GUI
-
+        print("WEBUI recieve_json:"+ str(content))
         if cmd == 'start_recording':
-            self.start_recording(channel, content["experiment"])
+            self.start_recording(channel, content["experiment"], content["subjectId"])
         elif cmd == 'stop_recording':
             self.stop_recording(channel, content["record"])
         else:
@@ -224,6 +228,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             })
 
     def webui_add_sensor(self, event):
+        #print("WEBUI add_sensor:"+str(event))
         self.send_json({
             'command': 'add_sensor',
             'sensor': event["channel"],
@@ -238,7 +243,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
         })
 
     def webui_update_sensor(self, event):
-
+        #print("WEBUI update_sensor:"+str(event))
         self.send_json({
             'command': 'update_sensor',
             'sensor': event["channel"],
@@ -247,6 +252,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
         })
 
     def webui_add_record(self, event):
+        #print("WEB UI Add Record")
         self.send_json({
             'command': 'add_record',
             'experiment': event["experiment"],
