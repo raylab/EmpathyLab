@@ -46,29 +46,13 @@ const Chart = {
   emoNames: ['Stress', 'Engagement', 'Relaxation', 'Exitement', 'Interest'],
   emoParams: ['Raw', 'Min', 'Max', 'Scaled'],
   emostates: {},
+  EQ:{},
   create(sensor) {
     const chart = document.createElement('canvas');
-    chart.height = 540;
+    chart.height = 430;
     chart.width = 600;
     chart.className = 'js-sensors-chart';
     this.queues[sensor] = [];
-    this.emostates[sensor] = {
-      Stress: {
-        Raw: 0, Min: 0, Max: 0, Scaled: 0,
-      },
-      Engagement: {
-        Raw: 0, Min: 0, Max: 0, Scaled: 0,
-      },
-      Relaxation: {
-        Raw: 0, Min: 0, Max: 0, Scaled: 0,
-      },
-      Exitement: {
-        Raw: 0, Min: 0, Max: 0, Scaled: 0,
-      },
-      Interest: {
-        Raw: 0, Min: 0, Max: 0, Scaled: 0,
-      },
-    };
     return chart;
   },
   drawDroppedPackets(chart, frames) {
@@ -80,7 +64,7 @@ const Chart = {
         const tNew = frames[i].COUNTER;
         const tOld = frames[i - 1].COUNTER;
 
-        if (i > 40 && tOld != ((tNew - 1) % 256)) {
+        if (i > 40 && tOld != ((tNew - 1) % 256)) {//Left edge of the time grid 140
           ctx.beginPath();
           ctx.moveTo(i, 20);
           ctx.lineTo(i, chart.height - 60);
@@ -97,7 +81,7 @@ const Chart = {
         const y = map(chan, 3, 15, 70, chart.height - 70);
         let x = chart.width - 1;
         ctx.fillStyle = 'rgb(255,255,255)';
-        ctx.fillText(this.header[chan], 5, y);
+        ctx.fillText(this.header[chan], 15, y);//Position of the electrode name
         ctx.beginPath();
         ctx.strokeStyle = 'rgb(255,255,255)';
         const initial = frames[cnt - 1][this.header[chan]];
@@ -106,7 +90,7 @@ const Chart = {
           const frame = frames[i];
           const value = frame[this.header[chan]];
           ctx.lineTo(x--, y + (value - 4200) * 0.5);
-          if (x === 40) { break; }
+          if (x === 40) { break; }//Left edge oh the electrode graph 40
         }
         ctx.stroke();
       }
@@ -122,7 +106,7 @@ const Chart = {
         const tNew = frames[i].TIMESTAMP;
         const tOld = frames[i - 1].TIMESTAMP;
 
-        if (i > 40 && Math.floor(tNew) !== Math.floor(tOld)) {
+        if (i > 40 && Math.floor(tNew) !== Math.floor(tOld)) { //Left edge of the time grid 40
           ctx.beginPath();
           ctx.moveTo(i, 20);
           ctx.lineTo(i, chart.height - 60);
@@ -132,36 +116,141 @@ const Chart = {
       }
     }
   },
-  drawEmostate(chart, emostate) {
+  draw(chart, frames, emostate = null, EQ = null) {
     const ctx = chart.getContext('2d');
-    ctx.strokeStyle = 'white';
-    ctx.fillStyle = 'white';
-    const emoNamesLength = this.emoNames.length;
-    const y = chart.height - 46;
-    for (let i = 0; i < emoNamesLength; i++) {
-      const x = map(i, 0, emoNamesLength, 5, chart.width - 5);
-      const emo = emostate[this.emoNames[i]];
-      ctx.fillText(`${this.emoNames[i]} Raw:${emo.Raw}`, x, y);
-      ctx.fillText(`${this.emoNames[i]} Min:${emo.Min}`, x, y + 14);
-      ctx.fillText(`${this.emoNames[i]} Max:${emo.Max}`, x, y + 28);
-      ctx.fillText(`${this.emoNames[i]} Scaled:${emo.Scaled}`, x, y + 42);
-    }
-  },
-  draw(chart, frames, emostate = null) {
-    const ctx = chart.getContext('2d');
-    if (chart.width !== chart.clientWidth || chart.height !== chart.clientHeight) {
-      chart.width = chart.clientWidth;
-      chart.height = chart.clientHeight;
-    }
+    //console.log("CHART");
+    //console.log(ctx);//.clientWidth);
+    let foo = document.getElementById('dash-table').rows[0].cells[1].clientWidth; //[1].offsetWidth;
+    //console.log(foo);//[1].clientWidth);
+    //console.log(chart.width);
+    chart.width = (foo - 5);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, chart.width, chart.height);
     this.drawTimeGrid(chart, frames);
     this.drawElectrodeData(chart, frames);
     this.drawDroppedPackets(chart, frames);
-    this.drawEmostate(chart, emostate);
+    //console.log(EQ);
   },
   getAll(container = document.body) {
     return container.querySelectorAll('.js-sensors-chart');
+  },
+};
+
+
+const EQdash = { 
+  create(sensor) {
+   const chart = document.createElement('canvas');
+    chart.height = 431;
+    chart.width = 349;
+    chart.className = 'js-eq-quality-chart';
+    //this.queues[sensor] = [];
+    chart.setAttribute('id', 'eq-quality');
+    //var myTrode = ['CMS', 'DLR', 'AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4'];
+    var myElement = document.getElementsByClassName("eq-quality");
+    //console.log("CREATING EQ DASH");
+    return chart;
+
+  },
+  draw(chart, EQ){
+    const ctx = chart.getContext('2d');
+    //ctx.fillStyle = 'grey';
+    //ctx.fillRect(0, 0, chart.width, chart.height);
+    var BGimageObj = new Image();
+    BGimageObj.onload = function(){
+    	ctx.drawImage(BGimageObj, 0, 0);
+    };
+    BGimageObj.src = "/static/res/BG_enames.png";
+    var foo = EQ;
+    //var myTrode = ['CMS', 'DLR', 'AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4'];
+    
+    var IEE_CHAN_AF3 = new Image();
+    IEE_CHAN_AF3.onload = function(){
+    	ctx.drawImage(IEE_CHAN_AF3, 85, 60);
+    };
+    IEE_CHAN_AF3.src = "/static/res/electrode_q" + foo['IEE_CHAN_AF3'] + ".png";
+
+    var IEE_CHAN_AF4 = new Image();
+    IEE_CHAN_AF4.onload = function(){
+    	ctx.drawImage(IEE_CHAN_AF4, 230, 60);
+    };
+    IEE_CHAN_AF4.src = "/static/res/electrode_q" + foo['IEE_CHAN_AF4'] + ".png";
+    var IEE_CHAN_F7 = new Image();
+    IEE_CHAN_F7.onload = function(){
+    	ctx.drawImage(IEE_CHAN_F7, 40, 110);
+    };
+    IEE_CHAN_F7.src = "/static/res/electrode_q" + foo['IEE_CHAN_F7'] + ".png";
+    var IEE_CHAN_F8 = new Image();
+    IEE_CHAN_F8.onload = function(){
+    	ctx.drawImage(IEE_CHAN_F8, 275, 110);
+    };
+    IEE_CHAN_F8.src = "/static/res/electrode_q" + foo['IEE_CHAN_F8'] + ".png";  
+    var IEE_CHAN_F3 = new Image();
+    IEE_CHAN_F3.onload = function(){
+    	ctx.drawImage(IEE_CHAN_F3, 105, 120);
+    };
+    IEE_CHAN_F3.src = "/static/res/electrode_q" + foo['IEE_CHAN_F3'] + ".png";
+    var IEE_CHAN_F4 = new Image();
+    IEE_CHAN_F4.onload = function(){
+    	ctx.drawImage(IEE_CHAN_F4, 215, 120);
+    };
+    IEE_CHAN_F4.src = "/static/res/electrode_q" + foo['IEE_CHAN_F4'] + ".png";
+    var IEE_CHAN_FC5 = new Image();
+    IEE_CHAN_FC5.onload = function(){
+    	ctx.drawImage(IEE_CHAN_FC5, 65, 170);
+    };
+    IEE_CHAN_FC5.src = "/static/res/electrode_q" + foo['IEE_CHAN_FC5'] + ".png";
+    var IEE_CHAN_FC6 = new Image();
+    IEE_CHAN_FC6.onload = function(){
+    	ctx.drawImage(IEE_CHAN_FC6, 255, 170);
+    };
+    IEE_CHAN_FC6.src = "/static/res/electrode_q" + foo['IEE_CHAN_FC6'] + ".png";
+   var IEE_CHAN_T7 = new Image();
+    IEE_CHAN_T7.onload = function(){
+    	ctx.drawImage(IEE_CHAN_T7, 20, 210);
+    };
+    IEE_CHAN_T7.src = "/static/res/electrode_q" + foo['IEE_CHAN_T7'] + ".png";
+    var IEE_CHAN_T8 = new Image();
+    IEE_CHAN_T8.onload = function(){
+    	ctx.drawImage(IEE_CHAN_T8, 295, 210);
+    };
+    IEE_CHAN_T8.src = "/static/res/electrode_q" + foo['IEE_CHAN_T8'] + ".png";
+    var IEE_CHAN_CMS = new Image();
+    IEE_CHAN_CMS.onload = function(){
+    	ctx.drawImage(IEE_CHAN_CMS, 40, 275);
+    };
+    IEE_CHAN_CMS.src = "/static/res/relectrode_q" + foo['IEE_CHAN_CMS'] + ".png";
+    var IEE_CHAN_DRL = new Image();
+    IEE_CHAN_DRL.onload = function(){
+    	ctx.drawImage(IEE_CHAN_DRL, 270, 275);
+    };
+    IEE_CHAN_DRL.src = "/static/res/relectrode_q" + foo['IEE_CHAN_DRL'] + ".png";  
+    var IEE_CHAN_P7 = new Image();
+    IEE_CHAN_P7.onload = function(){
+    	ctx.drawImage(IEE_CHAN_P7, 78, 320);
+    };
+    IEE_CHAN_P7.src = "/static/res/electrode_q" + foo['IEE_CHAN_P7'] + ".png";
+
+    var IEE_CHAN_P8 = new Image();
+    IEE_CHAN_P8.onload = function(){
+    	ctx.drawImage(IEE_CHAN_P8, 237, 320);
+    };
+    IEE_CHAN_P8.src = "/static/res/electrode_q" + foo['IEE_CHAN_P8'] + ".png";
+    var IEE_CHAN_O1 = new Image();
+    IEE_CHAN_O1.onload = function(){
+    	ctx.drawImage(IEE_CHAN_O1, 115, 390);
+    };
+    IEE_CHAN_O1.src = "/static/res/electrode_q" + foo['IEE_CHAN_O1'] + ".png";
+    var IEE_CHAN_O2 = new Image();
+    IEE_CHAN_O2.onload = function(){
+    	ctx.drawImage(IEE_CHAN_O2, 200, 390);
+    };
+    IEE_CHAN_O2.src = "/static/res/electrode_q" + foo['IEE_CHAN_O2'] + ".png";
+    //console.log("DRAWING EQ");
+    //console.log(foo);//['IEE_CHAN_AF3']);//ctx.canvas.baseURI);
+
+  },
+  getAll(container = document.body) {
+    return container.querySelectorAll('.js-eq-quality-chart');
   },
 };
 
@@ -193,7 +282,19 @@ const Headset = {
       header.appendChild(subjSelect);
     }
     item.appendChild(header);
-    item.appendChild(Chart.create(sensor));
+    const body = document.createElement('table');
+    body.setAttribute('id', 'dash-table');
+    var row = body.insertRow(0);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    cell1.append(EQdash.create(sensor));//This is if we deploy EQ-dash
+    cell2.append(Chart.create(sensor));
+    cell1.setAttribute('width', "240");
+    cell2.setAttribute('width', "100%");
+    //console.log("TABLE CELLS")
+    item.appendChild(body);
+    //item.appendChild(Chart.create(sensor));
+    //item.appendChild(EQdash.create(sensor));
     return item;
   },
 
@@ -207,10 +308,13 @@ const Headset = {
 
   drawData(item, data) {
     const charts = Chart.getAll(item);
+    const EQchart = EQdash.getAll(item);//If EQ-dash is enabled, uncomment this.
     //console.log(data.Frames); //Get's data from the Headset and draws it.
+    //console.log(item);//charts.length);
     for (let i = 0; i < charts.length; i += 1) {
       const frames = Chart.queues[item.getAttribute('data-channel')];
       let emostate = Chart.emostates[item.getAttribute('data-channel')];
+      let EQ = Chart.EQ[item.getAttribute('data-channel')];
       Array.prototype.push.apply(frames, data.Frames);
       if (frames.length > charts[i].width) {
         frames.splice(0, frames.length - charts[i].width);
@@ -218,10 +322,18 @@ const Headset = {
       if ('Emostate' in data) {
         emostate = data.Emostate;
         Chart.emostates[item.getAttribute('data-channel')] = emostate;
+        //console.log(Chart.emostates);
+      }
+      if ('EQ' in data){
+      	EQ = data.EQ;
+        Chart.EQ[item.getAttribute('data-channel')] = EQ;
+      	//console.log("EQ SENT");//data.EQ);
+      	//console.log(EQ);
       }
       item.firstChild.firstChild.nodeValue = data.RecordNumber;
-      window.requestAnimationFrame(() => {
-        Chart.draw(charts[i], frames, emostate);
+      window.requestAnimationFrame(() => {  //Actually sending things..
+        Chart.draw(charts[i], frames, emostate, EQ);
+        EQdash.draw(EQchart[i], EQ); //If EQ-dash is enabled uncomment this.
       });
     }
   },

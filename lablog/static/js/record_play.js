@@ -3,6 +3,9 @@
 
 var errorElm = document.getElementById('error');
 var dbFileElm = document.getElementById('dbfile');
+var cardHeader = document.getElementById('card-header');
+
+
 
 // Performance measurement functions
 var tictime;
@@ -41,7 +44,7 @@ function readDB() {
 	}
 	//console.log("DONE DUMP:");
 	//console.log("columns:" + dumpTable[0].columns.length + "rows:" + myRows);
-	myVar = setInterval(myTimer, 10);
+	myVar = setInterval(myTimer, 250);
 };
 
 function doDBRow(){
