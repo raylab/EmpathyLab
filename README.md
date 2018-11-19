@@ -1,5 +1,5 @@
 # django_empathy_laboratory
-Empathy Lab "Lab Log" website written in Django.
+Empathy Lab "Lab Log" made with Django.
 
 ----
 
