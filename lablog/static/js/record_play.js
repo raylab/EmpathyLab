@@ -3,7 +3,7 @@
 
 var errorElm = document.getElementById('error');
 var dbFileElm = document.getElementById('dbfile');
-var cardHeader = document.getElementById('card-header');
+var cardHeader = document.getElementsByClassName('card-header');
 
 
 
@@ -71,7 +71,26 @@ function doDBRow(){
                 tableJSON.push(rowJSON);
 	 	  	}
             wsPacket[table] = tableJSON;
-	 	   	}else if(table == 'Emostate'){
+        }else if(table == 'Bands'){
+        	var tableJSON = [];
+        	var el = 0;
+        	var trodeJSON = {};
+        	for (let bn = 1; bn < tableData[0].columns.length; bn += 1){
+        		if (el < 4){
+        			var trN = tableData[0].columns[bn].substr(0, tableData[0].columns[bn].lastIndexOf("_"));
+        			var trB = tableData[0].columns[bn].substr((tableData[0].columns[bn].lastIndexOf("_") + 1));
+        			trodeJSON[trB] = tableData[0].values[0][bn]
+        			el += 1;
+        	    }else if (el === 4){
+        	    	var tpackJSON = {};
+        	    	tpackJSON[trN] = trodeJSON;
+        	    	tableJSON.push(tpackJSON);
+        	    	trodeJSON = {};
+        	    	el = 0;
+        	    }
+        	}    
+        	wsPacket[table] = tableJSON;
+	 	}else if(table == 'Emostate'){
 	 	   	var esColumns = tableData[0].columns;
 	 	   	var esData = tableData[0].values[0];
 	 	   	var t = esColumns.shift();
@@ -88,17 +107,18 @@ function doDBRow(){
 	 	   		emoSt[emName] = seParm;
 	 	   	}
 	 	   	wsPacket[table] = emoSt;
-	 	   	}else if (tableData[0].values.length == 1) {
+	 	}else if (tableData[0].values.length == 1) {
 	 	   		var rowJSON = {};
 	 	   		for (let u = 1; u < tableData[0].columns.length; u += 1) {
 	      	        rowJSON[tableData[0].columns[u]] = tableData[0].values[0][u];
 	            };
 	            //console.log("SINGLE ROW")
 	            wsPacket[table] = rowJSON;
-	 	   	}
+	 	}
     }
     //console.log("WOULD SEND THIS TO WS:");
     //console.log(JSON.stringify(wsPacket));
+    $('.progress-through-file')[0].innerHTML = "Frames remain: " + myRows.length
 	SensorSimAPI.pushJSONPacket(JSON.stringify(wsPacket));
 };
 
@@ -106,12 +126,61 @@ function myTimer() {
     if (myRows.length == 0){
     	//console.log("DONE");
     	clearInterval(myVar);
+    	rptBtn.textContent = 'play';
     }else{
     	doDBRow();
     }
 }
 
 xhr.send();
+
+
+const RepeatButton = {
+  create() {
+    const btn = document.createElement('button');
+    this.set(btn);
+    return btn;
+  },
+  set(btn) {
+    const dom = btn;
+    dom.className = 'js-play-button btn btn-sm';
+    dom.textContent = 'pause';//isRecording ? 'Stop' : 'Record';
+    //dom.setAttribute('data-active', isRecording);
+    //dom.setAttribute('subject-id', 'none');
+  },
+  getAll(container = document.body) {
+    return container.querySelectorAll('.js-play-button');
+  },
+};
+
+console.log("MAKING A BUTTON")
+console.log(cardHeader);
+var rptBtn = RepeatButton.create();
+//cardHeader[0].appendChild(rpt.rptBtn);
+
+rptBtn.addEventListener('click', () => {
+    if (myRows.length == 0) {
+        rptBtn.textContent = 'pause';
+        readDB();
+    } else if (myRows.length != 0){
+    	if(rptBtn.textContent == 'pause'){
+    		clearInterval(myVar);
+    		rptBtn.textContent = 'play';
+    	}else if(rptBtn.textContent == 'play'){
+    		myVar = setInterval(myTimer, 250);
+    		rptBtn.textContent = 'pause';
+    	}
+    	
+//          item.dispatchEvent(new CustomEvent('startRecording'));
+    }
+});
+
+cardHeader[0].appendChild(rptBtn);
+const fileLength = document.createElement('div');
+fileLength.className = 'progress-through-file';
+cardHeader[0].appendChild(fileLength);
+
+
 
 const SensorSimAPI = {
   init(host) {

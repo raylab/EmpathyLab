@@ -378,9 +378,9 @@ def extract_bands(data):
         'AF4']
     param_names = ['Theta', 'Alpha', 'LBeta', 'HBeta', 'Gamma']
     bands_dict = dict()
-    for b in data['Bands']:
-        key, value = b.popitem()
-        bands_dict[key] = value
+    #bandsRet = data#['Bands']
+    for b in data:
+        bands_dict[list(b)[0]] = list(b.values())[0]
 
     bands = list()
     for band in band_names:
@@ -499,7 +499,9 @@ def add_tnes(filename, data):
 
 def add_eeg(filename, data):
     db = sqlite3.connect(data['record_filename'], check_same_thread=False)
-    bands = extract_bands(data)
+    #myBands = data['Bands']
+    bands = extract_bands(data['Bands'])
+    #Here Bands get extracted as list of values.
     eq = extract_eq(data)
     emostate = None
     if "Emostate" in data:

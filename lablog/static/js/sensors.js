@@ -43,14 +43,14 @@ function map(n, start1, stop1, start2, stop2) {
 const Chart = {
   queues: {},
   header: ['COUNTER', 'INTERPOLATED', 'RAW_CQ', 'AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4', 'GYROX', 'GYROY', 'TIMESTAMP', 'MARKER_HARDWARE', 'ES_TIMESTAMP', 'FUNC_ID', 'FUNC_VALUE', 'MARKER', 'SYNC_SIGNAL'],
-  emoNames: ['Stress', 'Engagement', 'Relaxation', 'Exitement', 'Interest'],
-  emoParams: ['Raw', 'Min', 'Max', 'Scaled'],
-  emostates: {},
-  EQ:{},
+  //emoNames: ['Stress', 'Engagement', 'Relaxation', 'Exitement', 'Interest'],
+  //emoParams: ['Raw', 'Min', 'Max', 'Scaled'],
+  //emostates: {},
+  //EQ:{},
   create(sensor) {
     const chart = document.createElement('canvas');
-    chart.height = 430;
-    chart.width = 600;
+    chart.height = 300;
+    chart.width = 1000;
     chart.className = 'js-sensors-chart';
     this.queues[sensor] = [];
     return chart;
@@ -78,7 +78,7 @@ const Chart = {
     const cnt = frames.length;
     if (cnt > 0) {
       for (let chan = 3; chan < 16; chan += 1) {
-        const y = map(chan, 3, 15, 70, chart.height - 70);
+        const y = map(chan, 3, 15, 70, chart.height - 30);
         let x = chart.width - 1;
         ctx.fillStyle = 'rgb(255,255,255)';
         ctx.fillText(this.header[chan], 15, y);//Position of the electrode name
@@ -120,10 +120,12 @@ const Chart = {
     const ctx = chart.getContext('2d');
     //console.log("CHART");
     //console.log(ctx);//.clientWidth);
-    let foo = document.getElementById('dash-table').rows[0].cells[1].clientWidth; //[1].offsetWidth;
-    //console.log(foo);//[1].clientWidth);
+    //let chrtWidth = document.getElementById('dash-table').rows[0].clientWidth;//cells[1].clientWidth; //[1].offsetWidth;
+    //let chrtWidth = document.getElementById('dash-table').rows[0].cells[1].childNodes[0].getBoundingClientRect().right;
+    let chrtWidth = 1025;
+    //console.log(chrtWidth);//[1].clientWidth);
     //console.log(chart.width);
-    chart.width = (foo - 5);
+    chart.width = (chrtWidth - 15);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, chart.width, chart.height);
     this.drawTimeGrid(chart, frames);
@@ -145,24 +147,25 @@ const EQdash = {
     chart.className = 'js-eq-quality-chart';
     //this.queues[sensor] = [];
     chart.setAttribute('id', 'eq-quality');
-    //var myTrode = ['CMS', 'DLR', 'AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4'];
+    //var myTrode = [
+    //               'CMS', 'DLR', 'AF3', 'F7', 'F3', 'FC5', 'T7',
+    //               'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4'
+    //];
     var myElement = document.getElementsByClassName("eq-quality");
-    //console.log("CREATING EQ DASH");
+    var BGimageObj = new Image();
+    const ctx = chart.getContext('2d');
+    BGimageObj.onload = function(){
+        ctx.drawImage(BGimageObj, 0, 0);
+    };
+    BGimageObj.src = "/static/res/BG_enames.png";
     return chart;
-
   },
   draw(chart, EQ){
     const ctx = chart.getContext('2d');
     //ctx.fillStyle = 'grey';
     //ctx.fillRect(0, 0, chart.width, chart.height);
-    var BGimageObj = new Image();
-    BGimageObj.onload = function(){
-    	ctx.drawImage(BGimageObj, 0, 0);
-    };
-    BGimageObj.src = "/static/res/BG_enames.png";
     var foo = EQ;
-    //var myTrode = ['CMS', 'DLR', 'AF3', 'F7', 'F3', 'FC5', 'T7', 'P7', 'O1', 'O2', 'P8', 'T8', 'FC6', 'F4', 'F8', 'AF4'];
-    
+
     var IEE_CHAN_AF3 = new Image();
     IEE_CHAN_AF3.onload = function(){
     	ctx.drawImage(IEE_CHAN_AF3, 85, 60);
@@ -246,13 +249,97 @@ const EQdash = {
     };
     IEE_CHAN_O2.src = "/static/res/electrode_q" + foo['IEE_CHAN_O2'] + ".png";
     //console.log("DRAWING EQ");
-    //console.log(foo);//['IEE_CHAN_AF3']);//ctx.canvas.baseURI);
+    //console.log(//ctx.canvas.baseURI);
 
   },
   getAll(container = document.body) {
     return container.querySelectorAll('.js-eq-quality-chart');
   },
 };
+
+const BandsChart = { 
+    shmu: {},
+    create(sensor) {
+    var myTrodeL = ['IED_AF3', 'IED_F7', 'IED_F3', 'IED_FC5', 'IED_T7', 'IED_P7', 'IED_O1'];
+    var myTrodeR = ['IED_AF4', 'IED_F8', 'IED_F4', 'IED_FC6', 'IED_T8', 'IED_P8', 'IED_O2'];
+    var myBands = ['Alpha', 'Theta', 'Gamma', 'HBeta', 'LBeta'];
+    console.log("CREATING BANDS FOR:");
+    console.log(sensor);
+    const body = document.createElement('table');
+    body.setAttribute('id', 'bands-table');
+    body.className = `js-electrode-bands-chart`;//-"${sensor}"` ;
+    this.shmu[sensor] = {};
+    for (i = 0; i < myTrodeL.length; i += 1){
+      var row = body.insertRow(i);
+      for (q = 0; q < 2; q += 1){
+        if (q == 0) {
+            var myTrode = myTrodeL[i];
+        } else if (q == 1) {
+            var myTrode = myTrodeR[i];
+        }
+        const bands = document.createElement('canvas');
+        bands.className = myTrode;
+        bands.setAttribute('width', "300");
+        bands.setAttribute('height', "55");
+        if (q == 0){
+            var cell1 = row.insertCell(0);
+            cell1.append(myTrode.slice(4));
+            cell2 = row.insertCell(1);
+        }else if (q == 1) {
+            var cell1 = row.insertCell(2);
+            cell1.append(myTrode.slice(4));
+            cell2 = row.insertCell(3);
+        }        
+        //console.log("CREATING EQ DASH");
+        var smoo = new SmoothieChart();
+        var subShmu = [];
+        for (z = 0; z < 5; z += 1) {
+            var bandLine = new TimeSeries();
+            var myRed = (z * 30)*2;
+            var myGreen = (255 - (z * 40));//(z * 2)*10;
+            var myBlue = (255 - (z * 10));
+            var myRGB = `rgb(${myRed}, ${myGreen}, ${myBlue})`;
+            //console.log(myRGB)
+            smoo.addTimeSeries(bandLine, {
+                strokeStyle: myRGB, //`rgb(${myRed}, ${myGreen}, ${myBlue})`, 
+                //fillStyle:'rgba(0, 255, 0, 0.4)', 
+                lineWidth:1 
+            });
+            subShmu[z] = bandLine;
+        }
+        smoo.streamTo(bands, 500);//document.getElementById("bands-chart"));
+        cell2.append(bands);//smoo);
+        this.shmu[sensor][myTrode] = subShmu;
+        };
+    };
+    //console.log(this.shmu);
+    return body;
+  },
+  draw(chart, bandsVal, TStamp, myCh){
+    //console.log("DRAWING BANDS");//bandsVal);
+    //console.log(chart.className)
+    var myBands = ['Alpha', 'Theta', 'Gamma', 'HBeta', 'LBeta'];
+    var myValues = {}; //Here converting List of Arrays into flat Dict.
+    for (i = 0; i < bandsVal.length; i += 1){
+        $.map(bandsVal[i], function(v, z){ 
+            myValues[z] = v;
+        })
+    }
+    //console.log(bandsVal);
+    var myTime = Date.parse(TStamp);
+    for (i = 0; i < chart.length; i += 1){
+        var myName = chart[i].className;
+        var myShmuList = this.shmu[myCh][myName];
+        for (a = 0; a < myBands.length; a += 1){
+           var myData = myValues[myName][myBands[a]]
+           myShmuList[a].append(myTime, myData)
+        }
+    }   
+  },
+  getAllBySensor(container = document.body) {
+    return container.querySelectorAll('table.js-electrode-bands-chart')[0].getElementsByTagName('canvas');//.rows;//'.js-bands-chart');
+  },
+}
 
 const Headset = {
   create(sensor, record, isRecording, showRecordButton, experimentID) {
@@ -283,18 +370,23 @@ const Headset = {
     }
     item.appendChild(header);
     const body = document.createElement('table');
+    body.className = 'js-dash-table'
     body.setAttribute('id', 'dash-table');
-    var row = body.insertRow(0);
-    var cell1 = row.insertCell(0);
-    var cell2 = row.insertCell(1);
+    var topRow = body.insertRow(0);
+    var cell1 = topRow.insertCell(0);
+    var cell2 = topRow.insertCell(1);
     cell1.append(EQdash.create(sensor));//This is if we deploy EQ-dash
-    cell2.append(Chart.create(sensor));
+    //cell2.append(Chart.create(sensor)); //Raw Electrode voltage chart
+    cell2.append(BandsChart.create(sensor)); // Bands table
     cell1.setAttribute('width', "240");
-    cell2.setAttribute('width', "100%");
+    cell2.setAttribute('width', "1000");
     //console.log("TABLE CELLS")
+    var bottomRow = body.insertRow(1);    
+    var bandsCell1 = bottomRow.insertCell(0);
+    bandsCell1.append(Chart.create(sensor));//Raw Electrode voltage chart
+    bandsCell1.setAttribute('colspan', "2");
+    bandsCell1.setAttribute('width', "700");
     item.appendChild(body);
-    //item.appendChild(Chart.create(sensor));
-    //item.appendChild(EQdash.create(sensor));
     return item;
   },
 
@@ -307,43 +399,48 @@ const Headset = {
   },
 
   drawData(item, data) {
-    const charts = Chart.getAll(item);
+    const charts = Chart.getAll(item); // Here we checking how many Headsets open
     const EQchart = EQdash.getAll(item);//If EQ-dash is enabled, uncomment this.
-    //console.log(data.Frames); //Get's data from the Headset and draws it.
-    //console.log(item);//charts.length);
+    //console.log("GETTING BANDS FOR ITEM:");
+    //console.log(item);
+    const Bands = BandsChart.getAllBySensor(item);   
+    //console.log(Bands) ;
     for (let i = 0; i < charts.length; i += 1) {
       const frames = Chart.queues[item.getAttribute('data-channel')];
-      let emostate = Chart.emostates[item.getAttribute('data-channel')];
-      let EQ = Chart.EQ[item.getAttribute('data-channel')];
+      //let emostate = Chart.emostates[item.getAttribute('data-channel')]; //Uncomment if using emostate
+      //let EQ = Chart.EQ[item.getAttribute('data-channel')];
       Array.prototype.push.apply(frames, data.Frames);
       if (frames.length > charts[i].width) {
         frames.splice(0, frames.length - charts[i].width);
       }
-      if ('Emostate' in data) {
-        emostate = data.Emostate;
-        Chart.emostates[item.getAttribute('data-channel')] = emostate;
-        //console.log(Chart.emostates);
-      }
+      //if ('Emostate' in data) {
+      //  emostate = data.Emostate;
+        //Chart.emostates[item.getAttribute('data-channel')] = emostate; //Uncomment if using emostates
+      //}
       if ('EQ' in data){
       	EQ = data.EQ;
-        Chart.EQ[item.getAttribute('data-channel')] = EQ;
-      	//console.log("EQ SENT");//data.EQ);
-      	//console.log(EQ);
+        //Chart.EQ[item.getAttribute('data-channel')] = EQ;
+      }
+      if ('Bands' in data){
+        bandsVal = data.Bands;
+        TStamp = data.TIMESTAMP;
       }
       item.firstChild.firstChild.nodeValue = data.RecordNumber;
+      var myCh = item.getAttribute('data-channel');
       window.requestAnimationFrame(() => {  //Actually sending things..
-        Chart.draw(charts[i], frames, emostate, EQ);
+        Chart.draw(charts[i], frames)//, emostate); //Uncomment if using emostate
         EQdash.draw(EQchart[i], EQ); //If EQ-dash is enabled uncomment this.
+        BandsChart.draw(Bands, bandsVal, TStamp, myCh);
       });
     }
   },
 
   getAll(container = document.body) {
-    //console.log("HERE");
     return container.querySelectorAll('.js-headset-item');
   },
 
   getBySensorAll(container = document.body, sensor) {
+    //console.log(sensor); //This get specific sensor from the HTML page.
     return container.querySelectorAll(`.js-headset-item[data-channel="${sensor}"]`);
   },
 };
@@ -446,7 +543,6 @@ function onUpdateRecord(data) {
 
 function onAddSensor(data) {
   const lists = HeadsetList.getAll();
-  //console.log("HERE-A:");
   for (let i = 0; i < lists.length; i += 1) {
     HeadsetList.addHeadset(lists[i], data.sensor, data.record, data.is_recorded);
   }
