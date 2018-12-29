@@ -1,5 +1,6 @@
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer, AsyncJsonWebsocketConsumer
 from channels.consumer import SyncConsumer
+from channels.layers import get_channel_layer
 from django.template import defaultfilters
 from asgiref.sync import async_to_sync
 from lablog.models import Record, Experiment
@@ -27,7 +28,6 @@ class SensorsConsumer(JsonWebsocketConsumer):
             "sensors",
             self.channel_name)
         self.accept()
-        #print("Sensor connect:")
         async_to_sync(self.channel_layer.group_send)(
             "webui",
             {
@@ -71,12 +71,16 @@ class SensorsConsumer(JsonWebsocketConsumer):
         )
 
     def sensors_start_recording(self, event):
+        #print("SENSOR STARTING RECORD", str(event))
         self.eeg_filename = event["eeg_filename"]
         self.record = event["record"]
         self.analysis_id = event["analysis_id"]
         self.analysis = event["analysis"]
         self.is_recorded = True
         self.sensors_update()
+        self.send_json({
+            'status': 'record_started',
+        })
 
     def sensors_stop_recording(self, event):
         self.is_recorded = False
@@ -85,6 +89,9 @@ class SensorsConsumer(JsonWebsocketConsumer):
         self.record = None
         self.eeg_filename = None
         self.sensors_update()
+        self.send_json({
+            'status': 'record_stoped',
+        })
 
     def sensors_update(self):
         async_to_sync(self.channel_layer.group_send)(
@@ -123,6 +130,7 @@ class WebAPIConsumer(JsonWebsocketConsumer):
 
         async_to_sync(self.channel_layer.group_add)("webui", self.channel_name)
         async_to_sync(self.channel_layer.group_add)("raw", self.channel_name)
+        #async_to_sync(self.channel_layer.group_add)("analyzers", self.channel_name)
         self.accept()       
         async_to_sync(self.channel_layer.group_send)(
             "sensors",
@@ -183,6 +191,14 @@ class WebAPIConsumer(JsonWebsocketConsumer):
                 "analysis": analysis_values
             },
         )
+        async_to_sync(self.channel_layer.send)(
+            "stimulae",
+            {
+                "type": "stimulae.recording_started",
+                "channel": self.channel_name,
+                "flag": "STARTED",
+            },
+        )
 
     def stop_recording(self, channel, record_id):
         async_to_sync(self.channel_layer.send)(
@@ -221,6 +237,8 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             self.start_recording(channel, content["experiment"], content["subjectId"])
         elif cmd == 'stop_recording':
             self.stop_recording(channel, content["record"])
+        elif cmd == 'reject_stimulae':
+            self.reject_stimulae(channel, content["reason"])  
         else:
             self.send_json({
                 'command': 'error_command',
@@ -228,7 +246,6 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             })
 
     def webui_add_sensor(self, event):
-        #print("WEBUI add_sensor:"+str(event))
         self.send_json({
             'command': 'add_sensor',
             'sensor': event["channel"],
@@ -280,7 +297,6 @@ class WebAPIConsumer(JsonWebsocketConsumer):
             'data': event["data"]
         })
 
-
 class TNESConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.sensor = self.scope['url_route']['kwargs']['sensor']
@@ -308,8 +324,7 @@ class PublicConsumer(AsyncJsonWebsocketConsumer):
         if event["data"]["RecordNumber"] == self.sensor:
             await self.send_json(event["data"])
 
-
-class AnalyzercConsumer(JsonWebsocketConsumer):
+class AnalyzersConsumer(JsonWebsocketConsumer):
     def connect(self):
         self.sensor = self.scope['url_route']['kwargs']['sensor']
         async_to_sync(
@@ -338,3 +353,4 @@ class AnalyzercConsumer(JsonWebsocketConsumer):
                 "data": data
             },
         )
+

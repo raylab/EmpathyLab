@@ -34,6 +34,22 @@ const SubjectSelector = {
   },
 };
 
+const StimRunning = {
+  create() {
+    const item = document.createElement("img");
+    item.setAttribute('className','stimulae-running');
+    //document.getElementById("myImg").src = "hackanm.gif";
+    item.setAttribute("src", "/static/res/electrode_q0.png");
+    return item;
+  }
+
+  /*var BGimageObj = new Image();
+    const ctx = chart.getContext('2d');
+    BGimageObj.onload = function(){
+        ctx.drawImage(BGimageObj, 0, 0);
+    };
+    BGimageObj.src = "/static/res/BG_enames.png";*/
+}
 
 
 function map(n, start1, stop1, start2, stop2) {
@@ -248,9 +264,6 @@ const EQdash = {
     	ctx.drawImage(IEE_CHAN_O2, 200, 390);
     };
     IEE_CHAN_O2.src = "/static/res/electrode_q" + foo['IEE_CHAN_O2'] + ".png";
-    //console.log("DRAWING EQ");
-    //console.log(//ctx.canvas.baseURI);
-
   },
   getAll(container = document.body) {
     return container.querySelectorAll('.js-eq-quality-chart');
@@ -263,8 +276,6 @@ const BandsChart = {
     var myTrodeL = ['IED_AF3', 'IED_F7', 'IED_F3', 'IED_FC5', 'IED_T7', 'IED_P7', 'IED_O1'];
     var myTrodeR = ['IED_AF4', 'IED_F8', 'IED_F4', 'IED_FC6', 'IED_T8', 'IED_P8', 'IED_O2'];
     var myBands = ['Alpha', 'Theta', 'Gamma', 'HBeta', 'LBeta'];
-    console.log("CREATING BANDS FOR:");
-    console.log(sensor);
     const body = document.createElement('table');
     body.setAttribute('id', 'bands-table');
     body.className = `js-electrode-bands-chart`;//-"${sensor}"` ;
@@ -312,12 +323,9 @@ const BandsChart = {
         this.shmu[sensor][myTrode] = subShmu;
         };
     };
-    //console.log(this.shmu);
     return body;
   },
   draw(chart, bandsVal, TStamp, myCh){
-    //console.log("DRAWING BANDS");//bandsVal);
-    //console.log(chart.className)
     var myBands = ['Alpha', 'Theta', 'Gamma', 'HBeta', 'LBeta'];
     var myValues = {}; //Here converting List of Arrays into flat Dict.
     for (i = 0; i < bandsVal.length; i += 1){
@@ -325,7 +333,6 @@ const BandsChart = {
             myValues[z] = v;
         })
     }
-    //console.log(bandsVal);
     var myTime = Date.parse(TStamp);
     for (i = 0; i < chart.length; i += 1){
         var myName = chart[i].className;
@@ -349,6 +356,8 @@ const Headset = {
     item.setAttribute('data-record', record);
     const header = document.createElement('div');
     header.className = 'd-flex justify-content-between align-items-center';
+    //var txt = document.createElement('label');
+    //txt.textContent = sensor;
     header.appendChild(document.createTextNode(sensor));
     if (showRecordButton) {
       const btn = RecordButton.create(isRecording);
@@ -360,6 +369,9 @@ const Headset = {
         }
       });
       header.appendChild(btn);
+      //var txt = document.createElement('label');
+      //txt.textContent = "Select subject by ID";
+      //item.appendChild(txt);
       const subjSelect = SubjectSelector.create(experimentID);
       subjSelect.addEventListener('click', () => {
           var subjId = subjSelect.options[subjSelect.selectedIndex].value;
@@ -367,7 +379,10 @@ const Headset = {
         {passive: true} 
        });
       header.appendChild(subjSelect);
+      const stimRun = StimRunning.create();
+      header.appendChild(stimRun);
     }
+ 
     item.appendChild(header);
     const body = document.createElement('table');
     body.className = 'js-dash-table'
@@ -401,8 +416,8 @@ const Headset = {
   drawData(item, data) {
     const charts = Chart.getAll(item); // Here we checking how many Headsets open
     const EQchart = EQdash.getAll(item);//If EQ-dash is enabled, uncomment this.
-    //console.log("GETTING BANDS FOR ITEM:");
-    //console.log(item);
+    //console.log("CHECKING FOR RECORD ALLOWING:");
+    //console.log(item.parentElement.hasAttribute('data-allow-recording'));
     const Bands = BandsChart.getAllBySensor(item);   
     //console.log(Bands) ;
     for (let i = 0; i < charts.length; i += 1) {
@@ -425,6 +440,14 @@ const Headset = {
         bandsVal = data.Bands;
         TStamp = data.TIMESTAMP;
       }
+      if (item.parentElement.hasAttribute('data-allow-recording')){
+        if (('Stim' in data && 'Stim_time' in data) && (data.Stim_time != 'nil' && data.Stim != 'nil')){
+          item.firstChild.childNodes[3].src = "/static/res/electrode_q4.png"
+        } else {
+          item.firstChild.childNodes[3].src = "/static/res/electrode_q0.png"
+        } 
+      }
+      
       item.firstChild.firstChild.nodeValue = data.RecordNumber;
       var myCh = item.getAttribute('data-channel');
       window.requestAnimationFrame(() => {  //Actually sending things..

@@ -153,8 +153,8 @@ const RepeatButton = {
   },
 };
 
-console.log("MAKING A BUTTON")
-console.log(cardHeader);
+//console.log("MAKING A BUTTON")
+//console.log(cardHeader);
 var rptBtn = RepeatButton.create();
 //cardHeader[0].appendChild(rpt.rptBtn);
 

@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS DUMP(
     ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     TIMESTAMP TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UserId INTEGER NOT NULL,
-    RecordNumber TEXT NOT NULL
+    RecordNumber TEXT NOT NULL,
+    Stim TEXT NOT NULL,
+    Stim_time TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Bands(
     DUMP_ID INTEGER NOT NULL,
@@ -181,7 +183,7 @@ CREATE TABLE IF NOT EXISTS TNES(
 """
 
 INSERT_DUMP = """
-INSERT INTO DUMP (ID,TIMESTAMP,UserId,RecordNumber) VALUES (?, ?, ?, ?)
+INSERT INTO DUMP (ID,TIMESTAMP,UserId,RecordNumber,Stim,Stim_time ) VALUES (?, ?, ?, ?, ?, ?)
 """
 
 
@@ -504,6 +506,9 @@ def add_eeg(filename, data):
     #Here Bands get extracted as list of values.
     eq = extract_eq(data)
     emostate = None
+    if (not 'Stim' in data) and (not 'Stim_time' in data) :
+        data['Stim'] = 'nil'
+        data['Stim_time'] = 'nil'
     if "Emostate" in data:
         emostate = extract_emostate(data)
     frames = extract_frames(data)
@@ -515,7 +520,7 @@ def add_eeg(filename, data):
         c.execute(
             INSERT_DUMP,
             [dump_id, timestamp, data["UserId"],
-             data["RecordNumber"]])
+             data["RecordNumber"], data['Stim'], data['Stim_time']])
         bands.insert(0, dump_id)
         eq.insert(0, dump_id)
         c.execute(INSERT_BANDS, bands)
