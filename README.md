@@ -1,5 +1,6 @@
 # django_empathy_laboratory
 Empathy Lab "Lab Log" made with Django.
+It is designed to be used with https://github.com/raylab/epoc_harvester
 
 ----
 
